@@ -1,4 +1,4 @@
-package com.afrunt.beanmetadata.test.basic.annotation;
+package com.afrunt.beanmetadata.test.annotation;
 
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;

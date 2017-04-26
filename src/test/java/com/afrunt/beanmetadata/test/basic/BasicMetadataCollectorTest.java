@@ -4,8 +4,8 @@ import com.afrunt.beanmetadata.BasicMetadataCollector;
 import com.afrunt.beanmetadata.BeanMetadata;
 import com.afrunt.beanmetadata.FieldMetadata;
 import com.afrunt.beanmetadata.Metadata;
-import com.afrunt.beanmetadata.test.basic.domain.Bean;
-import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
+import com.afrunt.beanmetadata.test.domain.Bean;
+import com.afrunt.beanmetadata.test.domain.SecondBean;
 import org.junit.Test;
 
 import java.util.Arrays;

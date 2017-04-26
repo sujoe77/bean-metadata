@@ -1,7 +1,7 @@
-package com.afrunt.beanmetadata.test.basic.domain;
+package com.afrunt.beanmetadata.test.domain;
 
-import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
-import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
+import com.afrunt.beanmetadata.test.annotation.FieldAnnotation;
+import com.afrunt.beanmetadata.test.annotation.TypeAnnotation;
 
 /**
  * @author Andrii Frunt
