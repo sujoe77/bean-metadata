@@ -16,23 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.afrunt.beanmetadata.annotation;
+package com.afrunt.beanmetadata.test.basic.domain;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.afrunt.beanmetadata.annotation.RemoveInheritedAnnotations;
+import com.afrunt.beanmetadata.test.basic.annotation.AnotherFieldAnnotation;
+import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
+import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 
 /**
  * @author Andrii Frunt
  */
-@Target(value = {METHOD, TYPE})
-@Retention(RUNTIME)
-@Inherited
-public @interface RemoveInheritedAnnotations {
-    Class<? extends Annotation>[] removeOnly() default {};
+@TypeAnnotation("secondBean")
+public class SecondBean extends BaseBean {
+    private String value;
+
+    @Override
+    @RemoveInheritedAnnotations(removeOnly = AnotherFieldAnnotation.class)
+    public String getId() {
+        return super.getId();
+    }
+
+    @FieldAnnotation("value")
+    public String getValue() {
+        return value;
+    }
+
+    public SecondBean setValue(String value) {
+        this.value = value;
+        return this;
+    }
 }

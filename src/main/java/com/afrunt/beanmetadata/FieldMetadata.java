@@ -1,7 +1,29 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.afrunt.beanmetadata;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +36,7 @@ public class FieldMetadata implements Annotated {
     private Method getter;
     private Method setter;
     private Set<Annotation> annotations = new HashSet<>();
+    private String recordClassName;
 
     public String getName() {
         return name;
@@ -59,7 +82,6 @@ public class FieldMetadata implements Annotated {
         return setter == null;
     }
 
-
     public Set<Annotation> getAnnotations() {
         return annotations;
     }
@@ -69,5 +91,73 @@ public class FieldMetadata implements Annotated {
         return this;
     }
 
+    public String getRecordClassName() {
+        return recordClassName;
+    }
 
+    public FieldMetadata setRecordClassName(String recordClassName) {
+        this.recordClassName = recordClassName;
+        return this;
+    }
+
+    public boolean isString() {
+        return typeIs(String.class);
+    }
+
+    public boolean isNumber() {
+        return Number.class.isAssignableFrom(getFieldType());
+    }
+
+    public boolean isShort() {
+        return typeIs(Short.class);
+    }
+
+    public boolean isInteger() {
+        return typeIs(Integer.class);
+    }
+
+    public boolean isDouble() {
+        return typeIs(Double.class);
+    }
+
+    public boolean isBigInteger() {
+        return typeIs(BigInteger.class);
+    }
+
+    public boolean isLong() {
+        return typeIs(Long.class);
+    }
+
+    public boolean isBigDecimal() {
+        return typeIs(BigDecimal.class);
+    }
+
+    public boolean isDate() {
+        return typeIs(Date.class);
+    }
+
+    public boolean isFractional() {
+        return isNumber() && (typeIs(Double.class) || typeIs(BigDecimal.class) || typeIs(Float.class));
+    }
+
+    @Override
+    public String toString() {
+        String typeName = fieldType.getName();
+        String className = recordClassName.substring(recordClassName.lastIndexOf(".") + 1);
+        return className + "->" + this.name + "[" + typeName.substring(typeName.lastIndexOf('.') + 1) + "] ";
+    }
+
+    public <T> T applyValue(T instance, Object value) {
+        if (!isReadOnly()) {
+            try {
+                getSetter().invoke(instance, value);
+                return instance;
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new BeanMetadataException("Error applying value " + this, e);
+            }
+        } else {
+            throw new BeanMetadataException("Error applying value. Field is read-only " + this);
+        }
+
+    }
 }

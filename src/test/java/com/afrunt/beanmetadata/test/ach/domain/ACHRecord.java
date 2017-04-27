@@ -16,23 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.afrunt.beanmetadata.annotation;
+package com.afrunt.beanmetadata.test.ach.domain;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
+import org.apache.commons.lang3.StringUtils;
+
+import static com.afrunt.beanmetadata.test.ach.annotation.InclusionRequirement.MANDATORY;
 
 /**
  * @author Andrii Frunt
  */
-@Target(value = {METHOD, TYPE})
-@Retention(RUNTIME)
-@Inherited
-public @interface RemoveInheritedAnnotations {
-    Class<? extends Annotation>[] removeOnly() default {};
+public abstract class ACHRecord {
+    public static final String RECORD_TYPE_CODE = "ACH Record Type Code";
+    private String record;
+
+    @ACHField(length = 1, inclusion = MANDATORY, name = RECORD_TYPE_CODE, typeTag = true)
+    public abstract String getRecordTypeCode();
+
+    public String getRecord() {
+        return record;
+    }
+
+    public ACHRecord setRecord(String record) {
+        this.record = record;
+        return this;
+    }
+
+    public String reserved(int length) {
+        return StringUtils.leftPad("", length, ' ');
+    }
 }

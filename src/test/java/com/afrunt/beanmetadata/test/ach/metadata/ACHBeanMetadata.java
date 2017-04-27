@@ -16,23 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.afrunt.beanmetadata.annotation;
+package com.afrunt.beanmetadata.test.ach.metadata;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.afrunt.beanmetadata.BeanMetadata;
+import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.util.Set;
 
 /**
  * @author Andrii Frunt
  */
-@Target(value = {METHOD, TYPE})
-@Retention(RUNTIME)
-@Inherited
-public @interface RemoveInheritedAnnotations {
-    Class<? extends Annotation>[] removeOnly() default {};
+public class ACHBeanMetadata extends BeanMetadata<ACHFieldMetadata> {
+    public Set<ACHFieldMetadata> getACHFieldsMetadata() {
+        return getFieldsAnnotatedWith(ACHField.class);
+    }
+
 }

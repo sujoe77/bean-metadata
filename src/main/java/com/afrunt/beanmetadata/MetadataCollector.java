@@ -1,3 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.afrunt.beanmetadata;
 
 import com.afrunt.beanmetadata.annotation.RemoveInheritedAnnotations;
@@ -19,7 +37,9 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         M metadata = newMetadata();
 
         metadata.setBeansMetadata(
-                classes.stream().map(this::collectTypeMetadata).collect(Collectors.toSet())
+                classes.stream().map(this::collectBeanMetadata)
+                        .filter(bm -> !skipBeanMetadata(bm))
+                        .collect(Collectors.toSet())
         );
 
         return metadata;
@@ -31,11 +51,15 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
     protected abstract FM newFieldMetadata();
 
-    protected BM collectTypeMetadata(Class<?> cl) {
+    protected BM collectBeanMetadata(Class<?> cl) {
         BM tm = newBeanMetadata();
         tm.setType(cl);
 
-        return collectBeanMetadataFromClassHierarchy(classHierarchy(cl), tm);
+        List<Class<?>> hierarchy = classHierarchy(cl);
+        BM beanMetadata = collectBeanMetadataFromClassHierarchy(hierarchy, tm);
+        validateBeanMetadata(beanMetadata);
+
+        return beanMetadata;
     }
 
     protected BM collectBeanMetadataFromClassHierarchy(List<Class<?>> hierarchy, BM typeMetadata) {
@@ -58,20 +82,67 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return beanMetadata;
     }
 
-    private BM collectBeanMetadata(Class<?> cl, BM beanMetadata) {
-        beanMetadata = addAnnotations(beanMetadata, cl.getDeclaredAnnotations());
+    protected BM collectBeanMetadata(Class<?> cl, BM beanMetadata) {
+        Annotation[] declaredAnnotations = cl.getDeclaredAnnotations();
+        beanMetadata = handleAnnotations(beanMetadata, declaredAnnotations);
         return beanMetadata;
     }
 
-    private Collection<Class<? extends Annotation>> annotationsToRemove(Annotated annotated, Annotation[] declaredAnnotations) {
-        return annotationsToRemove(Arrays.asList(declaredAnnotations), annotated);
+    protected FM collectFieldMetadata(Class<?> cl, Method getter, FM fieldMetadata) {
+        //TODO: everything related to field annotation starts here
+        fieldMetadata.setRecordClassName(cl.getName());
+        Annotation[] declaredAnnotations = getter.getDeclaredAnnotations();
+        fieldMetadata = handleAnnotations(fieldMetadata, declaredAnnotations);
+        fieldMetadata.setSetter(ofNullable(findSetterForGetter(cl, getter)).orElse(fieldMetadata.getSetter()));
+        return fieldMetadata;
+    }
+
+    protected <T extends Annotated> T handleAnnotations(T annotated, Annotation[] declaredAnnotations) {
+        annotated = removeAnnotations(annotated, declaredAnnotations);
+        annotated = addAnnotations(annotated, declaredAnnotations);
+        return annotated;
     }
 
     protected <T extends Annotated> T addAnnotations(T annotated, Annotation[] declaredAnnotations) {
-        annotated.removeAnnotations(annotationsToRemove(annotated, declaredAnnotations));
         Collection<Annotation> filteredDeclaredAnnotations = filterSkippedAnnotations(declaredAnnotations);
         annotated.addAnnotations(filteredDeclaredAnnotations);
+        for (Annotation a : filteredDeclaredAnnotations) {
+            if (annotated instanceof BeanMetadata) {
+                onAddBeanAnnotation((BM) annotated, a);
+            } else {
+                onAddFieldAnnotation((FM) annotated, a);
+            }
+        }
         return annotated;
+    }
+
+    protected <T extends Annotated> T removeAnnotations(T annotated, Annotation[] declaredAnnotations) {
+        Collection<Class<? extends Annotation>> annotationTypes = annotationsToRemove(annotated, declaredAnnotations);
+        Set<? extends Annotation> annotations = annotated.removeAnnotations(annotationTypes);
+        for (Annotation a : annotations) {
+            if (annotated instanceof BeanMetadata) {
+                onRemoveBeanAnnotation((BM) annotated, a);
+            } else {
+                onRemoveFieldAnnotation((FM) annotated, a);
+            }
+        }
+        return annotated;
+    }
+
+    protected BM onAddBeanAnnotation(BM beanMetadata, Annotation annotation) {
+        return beanMetadata;
+    }
+
+    protected BM onRemoveBeanAnnotation(BM beanMetadata, Annotation annotation) {
+        return beanMetadata;
+    }
+
+    protected FM onAddFieldAnnotation(FM fieldMetadata, Annotation annotation) {
+        return fieldMetadata;
+    }
+
+    protected FM onRemoveFieldAnnotation(FM fieldMetadata, Annotation annotation) {
+        return fieldMetadata;
     }
 
     @SuppressWarnings("unchecked")
@@ -79,16 +150,14 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         RemoveInheritedAnnotations removeInherited = (RemoveInheritedAnnotations) declaredAnnotations.stream().filter(a -> a instanceof RemoveInheritedAnnotations).findFirst().orElse(null);
 
         if (removeInherited != null) {
-            List<Class<? extends Annotation>> removeOnlyClasses = Arrays.asList(removeInherited.removeOnly());
+            boolean removeAllAnnotations = removeInherited.removeOnly().length == 0;
+            Collection<Class<? extends Annotation>> removeOnlyClasses = removeAllAnnotations ?
+                    annotated.getAnnotationTypes()
+                    : Arrays.asList(removeInherited.removeOnly());
 
-            if (removeOnlyClasses.isEmpty()) {
-                return annotated.getAnnotationTypes();
-            } else {
-                return removeOnlyClasses.stream()
-                        .filter(annotated::isAnnotatedWith)
-                        .map(c -> (Class<Annotation>) c)
-                        .collect(Collectors.toList());
-            }
+            return annotated.getAnnotationTypes().stream()
+                    .filter(removeOnlyClasses::contains)
+                    .collect(Collectors.toList());
 
         } else {
             return Collections.emptyList();
@@ -101,26 +170,24 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
                 .collect(Collectors.toSet());
     }
 
-    protected Set<FM> collectFieldsMetadata(Class<?> cl, Set<Method> getters, BM typeMetadata) {
+    protected Set<FM> collectFieldsMetadata(Class<?> cl, Set<Method> getters, BM beanMetadata) {
         Set<FM> result = new HashSet<>();
         for (Method getter : getters) {
             String fieldName = fieldNameFromGetter(getter);
-            FM fm = typeMetadata.getOrCreateFieldMetadataByName(fieldName, newFieldMetadata());
+            FM fm = beanMetadata.getOrCreateFieldMetadataByName(fieldName, newFieldMetadata());
             fm.setFieldType(getter.getReturnType());
             fm.setGetter(getter);
-            result.add(collectFieldMetadata(cl, getter, fm));
+
+            fm = collectFieldMetadata(cl, getter, fm);
+            if (!skipFieldMetadata(fm)) {
+                validateFieldMetadata(fm);
+                result.add(fm);
+            } else {
+                beanMetadata.removeFieldMetadata(fieldName);
+            }
         }
         return result;
     }
-
-    protected FM collectFieldMetadata(Class<?> cl, Method getter, FM fieldMetadata) {
-        //TODO: everything related to field annotation starts here
-        fieldMetadata = addAnnotations(fieldMetadata, getter.getDeclaredAnnotations());
-        fieldMetadata.setSetter(ofNullable(findSetterForGetter(cl, getter)).orElse(fieldMetadata.getSetter()));
-
-        return fieldMetadata;
-    }
-
 
     protected Collection<Annotation> filterSkippedAnnotations(Annotation[] annotations) {
         return filterSkippedAnnotations(Arrays.asList(annotations));
@@ -161,7 +228,6 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
                 .collect(Collectors.toSet());
     }
 
-
     protected Method findGetterForFieldName(Class<?> cl, String fieldName) {
         return Arrays.stream(cl.getDeclaredMethods())
                 .filter(m -> getterNameFromFieldName(fieldName).equals(m.getName()) && isValidGetter(m))
@@ -171,18 +237,36 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
     protected Method findSetterForGetter(Class<?> cl, Method getter) {
         try {
-            String setterName = "set" + StringUtils.capitalize(fieldNameFromGetter(getter));
-            Method setter = cl.getMethod(setterName, getter.getReturnType());
-
-            if (setter.getParameterCount() == 1) {
-                return setter;
-            } else {
-                return null;
-            }
+            Method setter = cl.getMethod(setterNameFromGetter(getter), getter.getReturnType());
+            return setter.getParameterCount() == 1 ? setter : null;
         } catch (NoSuchMethodException e) {
             //Field without setter
             return null;
         }
+    }
+
+    protected void validateBeanMetadata(BM beanMetadata) {
+
+    }
+
+    protected void validateFieldMetadata(FM fieldMetadata) {
+
+    }
+
+    protected boolean skipBeanMetadata(BM beanMetadata) {
+        return false;
+    }
+
+    protected boolean skipFieldMetadata(FM fieldMetadata) {
+        return false;
+    }
+
+    private Collection<Class<? extends Annotation>> annotationsToRemove(Annotated annotated, Annotation[] declaredAnnotations) {
+        return annotationsToRemove(Arrays.asList(declaredAnnotations), annotated);
+    }
+
+    private String setterNameFromGetter(Method getter) {
+        return "set" + StringUtils.capitalize(fieldNameFromGetter(getter));
     }
 
     private String getterNameFromFieldName(String fieldName) {
