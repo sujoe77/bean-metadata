@@ -36,13 +36,21 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     public M collectMetadata(Collection<Class<?>> classes) {
         M metadata = newMetadata();
 
+        Set<BM> beansMetadata = classes.stream()
+                .filter(c -> !skipClass(c))
+                .map(this::collectBeanMetadata)
+                .filter(bm -> !skipBeanMetadata(bm))
+                .collect(Collectors.toSet());
+
+        beansMetadata.forEach(this::validateBeanMetadata);
+
+        beansMetadata.stream().map(BeanMetadata::getFieldsMetadata)
+                .flatMap(Set::stream).forEach(this::validateFieldMetadata);
+
         metadata.setBeansMetadata(
-                classes.stream()
-                        .filter(c -> !skipClass(c))
-                        .map(this::collectBeanMetadata)
-                        .filter(bm -> !skipBeanMetadata(bm))
-                        .collect(Collectors.toSet())
+                beansMetadata
         );
+
 
         return metadata;
     }
@@ -59,8 +67,6 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
         List<Class<?>> hierarchy = classHierarchy(cl);
         BM beanMetadata = collectBeanMetadataFromClassHierarchy(hierarchy, tm);
-        validateBeanMetadata(beanMetadata);
-        beanMetadata.getFieldsMetadata().forEach(this::validateFieldMetadata);
 
         return beanMetadata;
     }
