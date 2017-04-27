@@ -19,3 +19,8 @@ FieldMetadata id = beanMetadata.getFieldMetadata("id");
 assertTrue(id.isAnnotatedWithAll(FieldAnnotation.class, AnotherFieldAnnotation.class));
 assertTrue(id.isString());
 ```
+You can collect the metadata from collection of beans
+```java
+BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
+Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = metadataCollector.collectMetadata(BEANS);
+```
