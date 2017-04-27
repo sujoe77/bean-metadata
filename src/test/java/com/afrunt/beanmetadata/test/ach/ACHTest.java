@@ -100,5 +100,7 @@ public class ACHTest {
 
         assertEquals(16, allFieldsMetadata.size());
 
+
+        assertEquals(15, fileHeader.reserved(15).length());
     }
 }

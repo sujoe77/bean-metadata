@@ -21,7 +21,8 @@ package com.afrunt.beanmetadata.test.ach.domain;
 
 import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
 import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
-import org.apache.commons.lang3.StringUtils;
+
+import java.util.stream.IntStream;
 
 import static com.afrunt.beanmetadata.test.ach.annotation.InclusionRequirement.MANDATORY;
 
@@ -46,6 +47,8 @@ public abstract class ACHRecord {
     }
 
     public String reserved(int length) {
-        return StringUtils.leftPad("", length, ' ');
+        StringBuilder sb = new StringBuilder();
+        IntStream.range(0, length).forEach(i -> sb.append(" "));
+        return sb.toString();
     }
 }

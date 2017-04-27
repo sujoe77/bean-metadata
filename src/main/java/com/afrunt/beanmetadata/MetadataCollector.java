@@ -19,7 +19,6 @@
 package com.afrunt.beanmetadata;
 
 import com.afrunt.beanmetadata.annotation.RemoveInheritedAnnotations;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -28,7 +27,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.uncapitalize;
 
 /**
  * @author Andrii Frunt
@@ -265,7 +263,27 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     private String setterNameFromGetter(Method getter) {
-        return "set" + StringUtils.capitalize(fieldNameFromGetter(getter));
+        return "set" + capitalize(fieldNameFromGetter(getter));
+    }
+
+    private String capitalize(String str) {
+        int strLen;
+        if (str != null && (strLen = str.length()) != 0) {
+            char firstChar = str.charAt(0);
+            return Character.isTitleCase(firstChar) ? str : (new StringBuilder(strLen)).append(Character.toTitleCase(firstChar)).append(str.substring(1)).toString();
+        } else {
+            return str;
+        }
+    }
+
+    private String uncapitalize(String str) {
+        int strLen;
+        if (str != null && (strLen = str.length()) != 0) {
+            char firstChar = str.charAt(0);
+            return Character.isLowerCase(firstChar) ? str : (new StringBuilder(strLen)).append(Character.toLowerCase(firstChar)).append(str.substring(1)).toString();
+        } else {
+            return str;
+        }
     }
 
     private String fieldNameFromGetter(Method getter) {
