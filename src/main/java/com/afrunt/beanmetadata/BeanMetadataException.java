@@ -32,8 +32,4 @@ public class BeanMetadataException extends RuntimeException {
     public BeanMetadataException(String message, Throwable cause) {
         super(message, cause);
     }
-
-    public BeanMetadataException(Throwable cause) {
-        super(cause);
-    }
 }

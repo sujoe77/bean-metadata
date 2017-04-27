@@ -20,6 +20,7 @@ package com.afrunt.beanmetadata.test.ach.domain;
 
 
 import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
+import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 import org.apache.commons.lang3.StringUtils;
 
 import static com.afrunt.beanmetadata.test.ach.annotation.InclusionRequirement.MANDATORY;
@@ -27,6 +28,7 @@ import static com.afrunt.beanmetadata.test.ach.annotation.InclusionRequirement.M
 /**
  * @author Andrii Frunt
  */
+@TypeAnnotation("achRecord")
 public abstract class ACHRecord {
     public static final String RECORD_TYPE_CODE = "ACH Record Type Code";
     private String record;

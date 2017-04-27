@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +90,6 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     protected FM collectFieldMetadata(Class<?> cl, Method getter, FM fieldMetadata) {
-        //TODO: everything related to field annotation starts here
         fieldMetadata.setRecordClassName(cl.getName());
         Annotation[] declaredAnnotations = getter.getDeclaredAnnotations();
         fieldMetadata = handleAnnotations(fieldMetadata, declaredAnnotations);
@@ -205,9 +205,20 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
     protected boolean isValidGetter(Method m) {
         String name = m.getName();
-        return name.startsWith("get")
-                && !"".equals(name.replaceFirst("get", ""))
-                && !m.getReturnType().equals(Void.class)
+        Class<?> returnType = m.getReturnType();
+
+        boolean plainGetterName = name.startsWith("get") && !"".equals(name.replaceFirst("get", ""));
+
+        boolean booleanGetterName = name.startsWith("is") && !"".equals(name.replaceFirst("is", ""))
+                && (Boolean.class.equals(returnType) || "boolean".equals(returnType.getName()));
+
+        boolean nameIsValid = plainGetterName || booleanGetterName;
+
+        boolean isPublic = Modifier.isPublic(m.getModifiers());
+
+        return nameIsValid
+                && isPublic
+                && !returnType.equals(Void.class)
                 && m.getParameterCount() == 0;
     }
 
@@ -221,24 +232,11 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return hierarchy;
     }
 
-    protected Set<Method> collectFieldGettersForFieldNames(Class<?> cl, Set<String> fieldNames) {
-        return fieldNames.stream()
-                .map(fieldName -> findGetterForFieldName(cl, fieldName))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    protected Method findGetterForFieldName(Class<?> cl, String fieldName) {
-        return Arrays.stream(cl.getDeclaredMethods())
-                .filter(m -> getterNameFromFieldName(fieldName).equals(m.getName()) && isValidGetter(m))
-                .findFirst()
-                .orElse(null);
-    }
-
     protected Method findSetterForGetter(Class<?> cl, Method getter) {
         try {
             Method setter = cl.getMethod(setterNameFromGetter(getter), getter.getReturnType());
-            return setter.getParameterCount() == 1 ? setter : null;
+            boolean validSetter = setter != null && setter.getParameterCount() == 1 && Modifier.isPublic(setter.getModifiers());
+            return validSetter ? setter : null;
         } catch (NoSuchMethodException e) {
             //Field without setter
             return null;
@@ -269,11 +267,12 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return "set" + StringUtils.capitalize(fieldNameFromGetter(getter));
     }
 
-    private String getterNameFromFieldName(String fieldName) {
-        return "get" + StringUtils.capitalize(fieldName);
-    }
-
     private String fieldNameFromGetter(Method getter) {
-        return uncapitalize(getter.getName().substring(3));
+        String methodName = getter.getName();
+        if (methodName.startsWith("get")) {
+            return uncapitalize(methodName.substring(3));
+        } else {
+            return uncapitalize(methodName.substring(2));
+        }
     }
 }

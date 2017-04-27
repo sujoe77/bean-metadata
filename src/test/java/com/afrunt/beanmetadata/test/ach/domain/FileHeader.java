@@ -19,10 +19,12 @@
 package com.afrunt.beanmetadata.test.ach.domain;
 
 
+import com.afrunt.beanmetadata.annotation.RemoveInheritedAnnotations;
 import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
 import com.afrunt.beanmetadata.test.ach.annotation.ACHRecordType;
 import com.afrunt.beanmetadata.test.ach.annotation.DateFormat;
 import com.afrunt.beanmetadata.test.ach.annotation.Values;
+import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 
 import java.util.Date;
 
@@ -36,6 +38,7 @@ import static com.afrunt.beanmetadata.test.ach.annotation.InclusionRequirement.*
  * @author Andrii Frunt
  */
 @ACHRecordType
+@RemoveInheritedAnnotations(removeOnly = TypeAnnotation.class)
 public class FileHeader extends ACHRecord {
     public static final String PRIORITY_CODE = "Priority Code";
     public static final String IMMEDIATE_DESTINATION = "Immediate Destination";
@@ -63,6 +66,8 @@ public class FileHeader extends ACHRecord {
     private String referenceCode;
 
     private String nonACHField;
+    private boolean booleanField;
+    private int intField;
 
     @Override
     @Values("1")
@@ -236,6 +241,24 @@ public class FileHeader extends ACHRecord {
 
     public FileHeader setNonACHField(String nonACHField) {
         this.nonACHField = nonACHField;
+        return this;
+    }
+
+    public boolean isBooleanField() {
+        return booleanField;
+    }
+
+    public FileHeader setBooleanField(boolean booleanField) {
+        this.booleanField = booleanField;
+        return this;
+    }
+
+    public int getIntField() {
+        return intField;
+    }
+
+    public FileHeader setIntField(int intField) {
+        this.intField = intField;
         return this;
     }
 }

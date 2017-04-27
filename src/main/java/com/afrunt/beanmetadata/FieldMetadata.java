@@ -47,10 +47,6 @@ public class FieldMetadata implements Annotated {
         return this;
     }
 
-    public boolean typeIs(Class<?> fieldType) {
-        return fieldType.equals(getFieldType());
-    }
-
     public Class<?> getFieldType() {
         return fieldType;
     }
@@ -109,15 +105,15 @@ public class FieldMetadata implements Annotated {
     }
 
     public boolean isShort() {
-        return typeIs(Short.class);
+        return typeIs(Short.class) || isPrimitiveWithName("short");
     }
 
     public boolean isInteger() {
-        return typeIs(Integer.class);
+        return typeIs(Integer.class) || isPrimitiveWithName("int");
     }
 
     public boolean isDouble() {
-        return typeIs(Double.class);
+        return typeIs(Double.class) || isPrimitiveWithName("double");
     }
 
     public boolean isBigInteger() {
@@ -125,7 +121,15 @@ public class FieldMetadata implements Annotated {
     }
 
     public boolean isLong() {
-        return typeIs(Long.class);
+        return typeIs(Long.class) || isPrimitiveWithName("long");
+    }
+
+    public boolean isFloat() {
+        return typeIs(Float.class) || isPrimitiveWithName("float");
+    }
+
+    public boolean isByte() {
+        return typeIs(Byte.class) || isPrimitiveWithName("byte");
     }
 
     public boolean isBigDecimal() {
@@ -136,8 +140,36 @@ public class FieldMetadata implements Annotated {
         return typeIs(Date.class);
     }
 
+    public boolean isBoolean() {
+        return typeIs(Boolean.class) || isPrimitiveWithName("boolean");
+    }
+
+    public boolean isPrimitiveWithName(String name) {
+        return isPrimitive() && typeNameIs(name);
+    }
+
+    public boolean isPrimitive(){
+        return getFieldType().isPrimitive();
+    }
+
     public boolean isFractional() {
         return isNumber() && (typeIs(Double.class) || typeIs(BigDecimal.class) || typeIs(Float.class));
+    }
+
+    public boolean typeIsAssignableFrom(Class<?> cl){
+        return getFieldType().isAssignableFrom(cl);
+    }
+
+    public boolean isAssignableFromType(Class<?> cl){
+        return cl.isAssignableFrom(getFieldType());
+    }
+
+    public boolean typeNameIs(String name){
+        return getFieldType().getName().equals(name);
+    }
+
+    public boolean typeIs(Class<?> fieldType) {
+        return fieldType.equals(getFieldType());
     }
 
     @Override

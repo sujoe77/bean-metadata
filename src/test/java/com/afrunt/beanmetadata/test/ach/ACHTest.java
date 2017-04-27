@@ -24,9 +24,12 @@ import com.afrunt.beanmetadata.test.ach.logic.ACHMetadataCollector;
 import com.afrunt.beanmetadata.test.ach.metadata.ACHBeanMetadata;
 import com.afrunt.beanmetadata.test.ach.metadata.ACHFieldMetadata;
 import com.afrunt.beanmetadata.test.ach.metadata.ACHMetadata;
+import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -44,12 +47,13 @@ public class ACHTest {
 
         ACHBeanMetadata headerMetadata = metadata.getBeanMetadata(FileHeader.class);
 
+        assertTrue(headerMetadata.notAnnotatedWith(TypeAnnotation.class));
         assertTrue(headerMetadata.isAnnotatedWith(ACHRecordType.class));
         assertEquals(1, headerMetadata.getAnnotations().size());
 
         Set<ACHFieldMetadata> allFieldsMetadata = headerMetadata.getFieldsMetadata();
 
-        assertEquals(15, allFieldsMetadata.size());
+        assertEquals(17, allFieldsMetadata.size());
 
         Set<ACHFieldMetadata> achFieldsMetadata = headerMetadata.getACHFieldsMetadata();
         assertEquals(13, achFieldsMetadata.size());
@@ -67,6 +71,30 @@ public class ACHTest {
         assertTrue(recordTypeMetadata.isString());
         assertEquals(0, recordTypeMetadata.getStart());
         assertEquals(1, recordTypeMetadata.getLength());
+
+        assertTrue(headerMetadata.getFieldMetadata("booleanField").isBoolean());
+        ACHFieldMetadata intField = headerMetadata.getFieldMetadata("intField");
+        assertTrue(intField.isInteger());
+        assertFalse(intField.isFractional());
+
+        FileHeader fileHeader = (FileHeader) headerMetadata.createInstance();
+
+        Date now = new Date();
+
+        fileHeader = headerMetadata.applyFieldValue(fileHeader, "fileCreationDate", now);
+
+        assertEquals(now, fileHeader.getFileCreationDate());
+
+        try {
+            headerMetadata.applyFieldValue(fileHeader, "wrongField", null);
+            Assert.fail("Exception should be thrown");
+            headerMetadata.applyFieldValue(fileHeader, "recordTypeCode", "1");
+            Assert.fail("Exception should be thrown");
+        } catch (Exception e) {
+
+        }
+
+
 
     }
 }
