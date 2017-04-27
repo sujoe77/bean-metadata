@@ -34,6 +34,7 @@ import static org.apache.commons.lang3.StringUtils.uncapitalize;
  * @author Andrii Frunt
  */
 public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends BeanMetadata<FM>, FM extends FieldMetadata> {
+
     public M collectMetadata(Collection<Class<?>> classes) {
         M metadata = newMetadata();
 

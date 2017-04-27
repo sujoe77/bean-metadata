@@ -67,6 +67,10 @@ public class ACHMetadataCollector extends MetadataCollector<ACHMetadata, ACHBean
             } catch (Exception e) {
                 throw new ACHException(dateFormat + " is wrong date format for field " + fm);
             }
+
+            if (dateFormat.length() != fm.getLength()) {
+                throw new ACHException("The length of date pattern should be equal to field length");
+            }
         }
     }
 }

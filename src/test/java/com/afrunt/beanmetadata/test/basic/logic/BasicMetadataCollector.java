@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.afrunt.beanmetadata;
+package com.afrunt.beanmetadata.test.basic.logic;
+
+import com.afrunt.beanmetadata.BeanMetadata;
+import com.afrunt.beanmetadata.FieldMetadata;
+import com.afrunt.beanmetadata.Metadata;
+import com.afrunt.beanmetadata.MetadataCollector;
 
 import java.lang.annotation.Annotation;
 
@@ -24,6 +29,7 @@ import java.lang.annotation.Annotation;
  * @author Andrii Frunt
  */
 public class BasicMetadataCollector extends MetadataCollector<Metadata<BeanMetadata<FieldMetadata>, FieldMetadata>, BeanMetadata<FieldMetadata>, FieldMetadata> {
+
     @Override
     protected Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> newMetadata() {
         return new Metadata<>();

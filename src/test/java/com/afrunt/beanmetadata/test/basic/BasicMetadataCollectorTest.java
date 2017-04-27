@@ -18,7 +18,6 @@
  */
 package com.afrunt.beanmetadata.test.basic;
 
-import com.afrunt.beanmetadata.BasicMetadataCollector;
 import com.afrunt.beanmetadata.BeanMetadata;
 import com.afrunt.beanmetadata.FieldMetadata;
 import com.afrunt.beanmetadata.Metadata;
@@ -27,6 +26,7 @@ import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 import com.afrunt.beanmetadata.test.basic.domain.Bean;
 import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
+import com.afrunt.beanmetadata.test.basic.logic.BasicMetadataCollector;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
