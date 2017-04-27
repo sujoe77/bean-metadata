@@ -24,3 +24,23 @@ You can collect the metadata from collection of beans
 BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
 Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = metadataCollector.collectMetadata(BEANS);
 ```
+But the most flexible scenario is to extend the MetadataCollector and types of metadata
+```java
+public class BasicMetadataCollector extends MetadataCollector<Metadata<BeanMetadata<FieldMetadata>, FieldMetadata>, BeanMetadata<FieldMetadata>, FieldMetadata> {
+
+    @Override
+    protected Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> newMetadata() {
+        return new Metadata<>();
+    }
+
+    @Override
+    protected BeanMetadata<FieldMetadata> newBeanMetadata() {
+        return new BeanMetadata<>();
+    }
+
+    @Override
+    protected FieldMetadata newFieldMetadata() {
+        return new FieldMetadata();
+    }
+}
+```
