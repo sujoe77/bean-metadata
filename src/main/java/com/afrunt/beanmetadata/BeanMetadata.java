@@ -77,7 +77,18 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
         for (String fieldName : fieldsValues.keySet()) {
             FM fm = getFieldMetadata(fieldName);
             Object value = fieldsValues.get(fieldName);
-            if (fm != null && !fm.isReadOnly() && value != null && fm.typeIs(value.getClass())) {
+            if (fm != null && !fm.isReadOnly()) {
+
+                if (value == null && fm.isPrimitive()) {
+                    continue;
+                }
+
+                Class<?> valueType = value.getClass();
+
+                if (value != null && !fm.typeIsAssignableFrom(valueType)) {
+                    continue;
+                }
+
                 fm.applyValue(instance, value);
             }
         }
@@ -163,14 +174,7 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
     }
 
     public String getBeanClassName() {
-        String name = getBeanFullClassName();
-
-        if (name.contains(".")) {
-            return name.substring(name.lastIndexOf(".") + 1);
-        } else {
-            return name;
-        }
-
+        return getType().getSimpleName();
     }
 
     @Override

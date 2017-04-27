@@ -132,16 +132,16 @@ public class FieldMetadata implements Annotated {
         return typeIs(Byte.class) || isPrimitiveWithName("byte");
     }
 
+    public boolean isBoolean() {
+        return typeIs(Boolean.class) || isPrimitiveWithName("boolean");
+    }
+
     public boolean isBigDecimal() {
         return typeIs(BigDecimal.class);
     }
 
     public boolean isDate() {
         return typeIs(Date.class);
-    }
-
-    public boolean isBoolean() {
-        return typeIs(Boolean.class) || isPrimitiveWithName("boolean");
     }
 
     public boolean isPrimitiveWithName(String name) {
@@ -182,7 +182,12 @@ public class FieldMetadata implements Annotated {
     public <T> T applyValue(T instance, Object value) {
         if (!isReadOnly()) {
             try {
+                if (value == null && isPrimitive()) {
+                    throw new BeanMetadataException("Cannot apply null to primitive field" + this);
+                }
+
                 getSetter().invoke(instance, value);
+
                 return instance;
             } catch (IllegalAccessException | InvocationTargetException e) {
                 throw new BeanMetadataException("Error applying value " + this, e);
@@ -190,6 +195,5 @@ public class FieldMetadata implements Annotated {
         } else {
             throw new BeanMetadataException("Error applying value. Field is read-only " + this);
         }
-
     }
 }

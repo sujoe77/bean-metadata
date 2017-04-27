@@ -27,6 +27,7 @@ import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 @TypeAnnotation("bean")
 public class Bean extends BaseBean {
     private String value;
+    private int primitiveIntField;
 
     @Override
     public String getId() {
@@ -40,6 +41,15 @@ public class Bean extends BaseBean {
 
     public Bean setValue(String value) {
         this.value = value;
+        return this;
+    }
+
+    public int getPrimitiveIntField() {
+        return primitiveIntField;
+    }
+
+    public Bean setPrimitiveIntField(int primitiveIntField) {
+        this.primitiveIntField = primitiveIntField;
         return this;
     }
 }

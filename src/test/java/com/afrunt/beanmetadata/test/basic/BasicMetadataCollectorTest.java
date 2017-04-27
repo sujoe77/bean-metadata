@@ -64,7 +64,7 @@ public class BasicMetadataCollectorTest {
 
         assertTrue(beanMetadata.isAnnotatedWith(TypeAnnotation.class));
 
-        assertEquals(2, beanMetadata.getFieldsMetadata().size());
+        assertEquals(3, beanMetadata.getFieldsMetadata().size());
 
         assertEquals("bean", beanMetadata.getAnnotation(TypeAnnotation.class).value());
 
@@ -86,11 +86,18 @@ public class BasicMetadataCollectorTest {
 
         map.put("id", "id");
         map.put("value", "value");
+        map.put("primitiveIntField", null);
 
         Bean bean = beanMetadata.beanFromMap(Bean.class, map);
 
         assertEquals("id", bean.getId());
         assertEquals("value", bean.getValue());
+        assertEquals(0, bean.getPrimitiveIntField());
+
+        /*map.put("primitiveIntField", 1);
+        bean = beanMetadata.beanFromMap(Bean.class, map);
+        assertEquals(1, bean.getPrimitiveIntField());*/
+
     }
 
     private void testBeanMetadata(BeanMetadata<FieldMetadata> bm) {
@@ -100,9 +107,8 @@ public class BasicMetadataCollectorTest {
         assertEquals("bean", typeAnnotation.value());
         assertEquals(1, bm.getAnnotations().size());
 
-        assertEquals(2, bm.getFieldsMetadata().size());
+        assertEquals(3, bm.getFieldsMetadata().size());
         assertNotNull(bm.createInstance());
-        assertEquals(Arrays.asList("id", "value"), new ArrayList<>(bm.getFieldNames()));
 
         testFieldMetadata(bm, "id", String.class, new Class[]{FieldAnnotation.class, AnotherFieldAnnotation.class});
         testFieldMetadata(bm, "value", String.class, new Class[]{FieldAnnotation.class});
