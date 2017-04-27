@@ -39,6 +39,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         Set<BM> beansMetadata = classes.stream()
                 .filter(c -> !skipClass(c))
                 .map(this::collectBeanMetadata)
+                .filter(Objects::nonNull)
                 .filter(bm -> !skipBeanMetadata(bm))
                 .collect(Collectors.toSet());
 
@@ -55,21 +56,29 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return metadata;
     }
 
-    protected abstract M newMetadata();
+    public BM collectBeanMetadata(Class<?> cl) {
+        if (skipClass(cl)) {
+            return null;
+        }
 
-    protected abstract BM newBeanMetadata();
-
-    protected abstract FM newFieldMetadata();
-
-    protected BM collectBeanMetadata(Class<?> cl) {
         BM tm = newBeanMetadata();
         tm.setType(cl);
 
         List<Class<?>> hierarchy = classHierarchy(cl);
         BM beanMetadata = collectBeanMetadataFromClassHierarchy(hierarchy, tm);
 
-        return beanMetadata;
+        if (skipBeanMetadata(beanMetadata)) {
+            return null;
+        } else {
+            return beanMetadata;
+        }
     }
+
+    protected abstract M newMetadata();
+
+    protected abstract BM newBeanMetadata();
+
+    protected abstract FM newFieldMetadata();
 
     protected BM collectBeanMetadataFromClassHierarchy(List<Class<?>> hierarchy, BM typeMetadata) {
         if (!hierarchy.isEmpty()) {

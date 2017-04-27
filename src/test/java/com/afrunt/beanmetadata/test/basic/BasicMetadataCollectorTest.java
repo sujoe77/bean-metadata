@@ -18,6 +18,7 @@
  */
 package com.afrunt.beanmetadata.test.basic;
 
+import com.afrunt.beanmetadata.BasicMetadataCollector;
 import com.afrunt.beanmetadata.BeanMetadata;
 import com.afrunt.beanmetadata.FieldMetadata;
 import com.afrunt.beanmetadata.Metadata;
@@ -26,7 +27,6 @@ import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 import com.afrunt.beanmetadata.test.basic.domain.Bean;
 import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
-import com.afrunt.beanmetadata.test.basic.logic.BasicMetadataCollector;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
@@ -45,7 +45,8 @@ public class BasicMetadataCollectorTest {
 
     @Test
     public void testMetadataCollection() {
-        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = new BasicMetadataCollector().collectMetadata(BEANS);
+        BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
+        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = metadataCollector.collectMetadata(BEANS);
 
         Set<BeanMetadata<FieldMetadata>> beansMetadata = metadata.getBeansMetadata();
 
@@ -57,6 +58,26 @@ public class BasicMetadataCollectorTest {
         BeanMetadata<FieldMetadata> sbm = metadata.getBeanMetadata(SecondBean.class);
         assertNotNull(sbm);
 
+    }
+
+    @Test
+    public void testBeanMetadataCollection() {
+        BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
+        BeanMetadata<FieldMetadata> beanMetadata = metadataCollector.collectBeanMetadata(Bean.class);
+
+        assertTrue(beanMetadata.isAnnotatedWith(TypeAnnotation.class));
+
+        assertEquals(2, beanMetadata.getFieldsMetadata().size());
+
+        assertEquals("bean", beanMetadata.getAnnotation(TypeAnnotation.class).value());
+
+        assertTrue(beanMetadata.hasField("id"));
+        assertTrue(beanMetadata.hasField("value"));
+
+        FieldMetadata id = beanMetadata.getFieldMetadata("id");
+
+        assertTrue(id.isAnnotatedWithAll(FieldAnnotation.class, AnotherFieldAnnotation.class));
+        assertTrue(id.isString());
     }
 
     private void testBeanMetadata(BeanMetadata<FieldMetadata> bm) {

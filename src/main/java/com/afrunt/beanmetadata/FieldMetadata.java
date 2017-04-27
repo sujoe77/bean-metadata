@@ -148,7 +148,7 @@ public class FieldMetadata implements Annotated {
         return isPrimitive() && typeNameIs(name);
     }
 
-    public boolean isPrimitive(){
+    public boolean isPrimitive() {
         return getFieldType().isPrimitive();
     }
 
@@ -156,15 +156,15 @@ public class FieldMetadata implements Annotated {
         return isNumber() && (typeIs(Double.class) || typeIs(BigDecimal.class) || typeIs(Float.class));
     }
 
-    public boolean typeIsAssignableFrom(Class<?> cl){
+    public boolean typeIsAssignableFrom(Class<?> cl) {
         return getFieldType().isAssignableFrom(cl);
     }
 
-    public boolean isAssignableFromType(Class<?> cl){
+    public boolean isAssignableFromType(Class<?> cl) {
         return cl.isAssignableFrom(getFieldType());
     }
 
-    public boolean typeNameIs(String name){
+    public boolean typeNameIs(String name) {
         return getFieldType().getName().equals(name);
     }
 

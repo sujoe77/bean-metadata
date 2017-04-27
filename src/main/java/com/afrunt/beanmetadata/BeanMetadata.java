@@ -145,8 +145,6 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
 
     }
 
-
-
     @Override
     public String toString() {
         return "BeanMetadata[" + getType().getName() + "]";
