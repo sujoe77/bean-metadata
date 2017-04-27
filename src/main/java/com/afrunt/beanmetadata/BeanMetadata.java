@@ -49,12 +49,40 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
     }
 
     public Object createInstance() {
+        return createInstance(type);
+    }
+
+    public <T> T createInstance(Class<T> type) {
+        if (!typeIs(type)) {
+            throw new BeanMetadataException("Wrong bean type" + type);
+        }
+
         try {
-            return getType()
-                    .newInstance();
+            return (T) getType().newInstance();
         } catch (Exception e) {
             throw new BeanMetadataException();
         }
+    }
+
+    public Object beanFromMap(Map<String, Object> fieldsValues) {
+        return beanFromMap(getType(), fieldsValues);
+    }
+
+    public <T> T beanFromMap(Class<T> type, Map<String, Object> fieldsValues) {
+        if (!typeIs(type)) {
+            throw new BeanMetadataException("Wrong bean type" + type);
+        }
+
+        T instance = createInstance(type);
+        for (String fieldName : fieldsValues.keySet()) {
+            FM fm = getFieldMetadata(fieldName);
+            Object value = fieldsValues.get(fieldName);
+            if (fm != null && !fm.isReadOnly() && value != null && fm.typeIs(value.getClass())) {
+                fm.applyValue(instance, value);
+            }
+        }
+
+        return instance;
     }
 
     public Set<FM> getFieldsMetadata() {

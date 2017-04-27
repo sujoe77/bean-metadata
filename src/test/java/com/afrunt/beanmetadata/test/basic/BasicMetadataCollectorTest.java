@@ -30,10 +30,7 @@ import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -78,6 +75,22 @@ public class BasicMetadataCollectorTest {
 
         assertTrue(id.isAnnotatedWithAll(FieldAnnotation.class, AnotherFieldAnnotation.class));
         assertTrue(id.isString());
+    }
+
+    @Test
+    public void testBeanCreationFromMap() {
+        BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
+        BeanMetadata<FieldMetadata> beanMetadata = metadataCollector.collectBeanMetadata(Bean.class);
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("id", "id");
+        map.put("value", "value");
+
+        Bean bean = beanMetadata.beanFromMap(Bean.class, map);
+
+        assertEquals("id", bean.getId());
+        assertEquals("value", bean.getValue());
     }
 
     private void testBeanMetadata(BeanMetadata<FieldMetadata> bm) {
