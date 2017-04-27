@@ -73,6 +73,7 @@ public class ACHTest {
         assertEquals(1, recordTypeMetadata.getLength());
 
         assertTrue(headerMetadata.getFieldMetadata("booleanField").isBoolean());
+        assertTrue(headerMetadata.getFieldMetadata("fileCreationTime").isOptional());
         ACHFieldMetadata intField = headerMetadata.getFieldMetadata("intField");
         assertTrue(intField.isInteger());
         assertFalse(intField.isFractional());
@@ -93,8 +94,11 @@ public class ACHTest {
         } catch (Exception e) {
 
         }
+        headerMetadata.removeFieldMetadata("nonACHField");
 
+        allFieldsMetadata = headerMetadata.getFieldsMetadata();
 
+        assertEquals(16, allFieldsMetadata.size());
 
     }
 }
