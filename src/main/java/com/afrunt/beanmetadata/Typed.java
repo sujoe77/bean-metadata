@@ -45,6 +45,14 @@ public interface Typed {
         return ClassUtil.isCompatiblePrimitives(fieldType, cl);
     }
 
+    default String getTypeName() {
+        return getType().getName();
+    }
+
+    default String getSimpleTypeName() {
+        return getType().getSimpleName();
+    }
+
     default boolean isString() {
         return typeIs(String.class);
     }

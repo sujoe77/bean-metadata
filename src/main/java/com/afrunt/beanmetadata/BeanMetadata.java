@@ -51,12 +51,16 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
     }
 
     public Object createInstance() {
-        return createInstance(type);
+        return createInstance(getType());
     }
 
     public <T> T createInstance(Class<T> type) {
         if (!typeIs(type)) {
             throw new BeanMetadataException("Wrong bean type" + type);
+        }
+
+        if (isAbstract()) {
+            throw new BeanMetadataException("Cannot create instance of abstract class " + getType());
         }
 
         try {
@@ -175,7 +179,7 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         if (instance != null && fm != null) {
             return fm.applyValue(instance, value);
         } else {
-            throw new BeanMetadataException("Instance and field metadata are required " + this);
+            throw new BeanMetadataException("Instance and field metadata are required to apply the field value " + this);
         }
     }
 
@@ -186,14 +190,6 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
     public BeanMetadata setAnnotations(Set<Annotation> annotations) {
         this.annotations = annotations;
         return this;
-    }
-
-    public String getBeanFullClassName() {
-        return getType().getName();
-    }
-
-    public String getBeanClassName() {
-        return getType().getSimpleName();
     }
 
     protected Method getTargetGetter(Object target, FM fm) {
@@ -220,6 +216,6 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
 
     @Override
     public String toString() {
-        return "BeanMetadata[" + getType().getName() + "]";
+        return "BeanMetadata[" + getSimpleTypeName() + "]";
     }
 }
