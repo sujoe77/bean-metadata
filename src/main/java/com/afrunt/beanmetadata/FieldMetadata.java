@@ -157,7 +157,11 @@ public class FieldMetadata implements Annotated {
     }
 
     public boolean typeIsAssignableFrom(Class<?> cl) {
-        return getFieldType().isAssignableFrom(cl);
+        return typeIs(cl) || getFieldType().isAssignableFrom(cl) || compatiblePrimitives(getFieldType(), cl);
+    }
+
+    private boolean compatiblePrimitives(Class<?> fieldType, Class<?> cl) {
+        return ClassUtil.isCompatiblePrimitives(fieldType, cl);
     }
 
     public boolean isAssignableFromType(Class<?> cl) {
@@ -172,18 +176,15 @@ public class FieldMetadata implements Annotated {
         return fieldType.equals(getFieldType());
     }
 
-    @Override
-    public String toString() {
-        String typeName = fieldType.getName();
-        String className = recordClassName.substring(recordClassName.lastIndexOf(".") + 1);
-        return className + "->" + this.name + "[" + typeName.substring(typeName.lastIndexOf('.') + 1) + "] ";
-    }
-
     public <T> T applyValue(T instance, Object value) {
         if (!isReadOnly()) {
             try {
                 if (value == null && isPrimitive()) {
                     throw new BeanMetadataException("Cannot apply null to primitive field" + this);
+                }
+
+                if (value != null && !typeIsAssignableFrom(value.getClass())) {
+                    throw new BeanMetadataException("Cannot apply field value. Types are incompatible. " + this);
                 }
 
                 getSetter().invoke(instance, value);
@@ -195,5 +196,12 @@ public class FieldMetadata implements Annotated {
         } else {
             throw new BeanMetadataException("Error applying value. Field is read-only " + this);
         }
+    }
+
+    @Override
+    public String toString() {
+        String typeName = fieldType.getName();
+        String className = recordClassName.substring(recordClassName.lastIndexOf(".") + 1);
+        return className + "->" + this.name + "[" + typeName.substring(typeName.lastIndexOf('.') + 1) + "] ";
     }
 }

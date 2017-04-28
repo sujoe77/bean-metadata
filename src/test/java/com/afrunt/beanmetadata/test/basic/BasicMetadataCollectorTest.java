@@ -26,6 +26,7 @@ import com.afrunt.beanmetadata.test.basic.annotation.AnotherFieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
 import com.afrunt.beanmetadata.test.basic.domain.Bean;
+import com.afrunt.beanmetadata.test.basic.domain.ChildBean;
 import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
 import org.junit.Test;
 
@@ -94,10 +95,25 @@ public class BasicMetadataCollectorTest {
         assertEquals("value", bean.getValue());
         assertEquals(0, bean.getPrimitiveIntField());
 
-        /*map.put("primitiveIntField", 1);
+        map.put("primitiveIntField", 1);
         bean = beanMetadata.beanFromMap(Bean.class, map);
-        assertEquals(1, bean.getPrimitiveIntField());*/
+        assertEquals(1, bean.getPrimitiveIntField());
 
+
+        Map<String, Object> mapFromBean = beanMetadata.beanToMap(bean);
+        assertEquals(3, mapFromBean.size());
+
+        assertEquals(map, mapFromBean);
+
+        ChildBean cb = new ChildBean();
+
+        cb.setId("id");
+        cb.setValue("value");
+        cb.setPrimitiveIntField(1);
+
+        Map<String, Object> childBeanMap = beanMetadata.beanToMap(cb);
+        assertEquals(3, childBeanMap.size());
+        assertEquals(777, childBeanMap.get("primitiveIntField"));
     }
 
     private void testBeanMetadata(BeanMetadata<FieldMetadata> bm) {

@@ -19,6 +19,9 @@
 package com.afrunt.beanmetadata;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -48,6 +51,10 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
         return type.equals(getType());
     }
 
+    public boolean typeIsAssignableFrom(Class<?> type) {
+        return getType().isAssignableFrom(type);
+    }
+
     public Object createInstance() {
         return createInstance(type);
     }
@@ -62,6 +69,14 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
         } catch (Exception e) {
             throw new BeanMetadataException();
         }
+    }
+
+    public boolean isAbstract() {
+        return Modifier.isAbstract(getTypeModifiers());
+    }
+
+    public int getTypeModifiers() {
+        return getType().getModifiers();
     }
 
     public Object beanFromMap(Map<String, Object> fieldsValues) {
@@ -83,9 +98,7 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
                     continue;
                 }
 
-                Class<?> valueType = value.getClass();
-
-                if (value != null && !fm.typeIsAssignableFrom(valueType)) {
+                if (value != null && !fm.typeIsAssignableFrom(value.getClass())) {
                     continue;
                 }
 
@@ -94,6 +107,25 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
         }
 
         return instance;
+    }
+
+    public Map<String, Object> beanToMap(Object bean) {
+        if (bean == null) {
+            throw new BeanMetadataException("Bean cannot be null");
+        }
+
+        if (typeIs(bean.getClass()) || typeIsAssignableFrom(bean.getClass())) {
+            Map<String, Object> map = new HashMap<>();
+
+            for (FM fm : getFieldsMetadata()) {
+                Method targetGetter = getTargetGetter(bean, fm);
+                map.put(fm.getName(), invokeMethod(bean, targetGetter));
+            }
+
+            return map;
+        } else {
+            throw new BeanMetadataException("Incompatible bean type " + bean.getClass());
+        }
     }
 
     public Set<FM> getFieldsMetadata() {
@@ -175,6 +207,28 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
 
     public String getBeanClassName() {
         return getType().getSimpleName();
+    }
+
+    protected Method getTargetGetter(Object target, FM fm) {
+        try {
+            Method originalGetter = fm.getGetter();
+            Method getter = target.getClass().getMethod(originalGetter.getName());
+            if (fm.typeIsAssignableFrom(getter.getReturnType())) {
+                return getter;
+            } else {
+                throw new BeanMetadataException("Compatible getter not found for target " + target);
+            }
+        } catch (NoSuchMethodException e) {
+            throw new BeanMetadataException("Target getter not found for " + fm);
+        }
+    }
+
+    protected Object invokeMethod(Object instance, Method method, Object... params) {
+        try {
+            return method.invoke(instance, params);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BeanMetadataException("Error during method invocation " + method, e);
+        }
     }
 
     @Override

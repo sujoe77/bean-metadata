@@ -230,10 +230,8 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
         boolean nameIsValid = plainGetterName || booleanGetterName;
 
-        boolean isPublic = Modifier.isPublic(m.getModifiers());
-
         return nameIsValid
-                && isPublic
+                && isPublic(m)
                 && !returnType.equals(Void.class)
                 && m.getParameterCount() == 0;
     }
@@ -251,7 +249,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     protected Method findSetterForGetter(Class<?> cl, Method getter) {
         try {
             Method setter = cl.getMethod(setterNameFromGetter(getter), getter.getReturnType());
-            boolean validSetter = setter != null && setter.getParameterCount() == 1 && Modifier.isPublic(setter.getModifiers());
+            boolean validSetter = setter != null && setter.getParameterCount() == 1 && isPublic(setter);
             return validSetter ? setter : null;
         } catch (NoSuchMethodException e) {
             //Field without setter
@@ -279,12 +277,25 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return false;
     }
 
+    private boolean isPublic(Method m) {
+        return Modifier.isPublic(m.getModifiers());
+    }
+
     private Collection<Class<? extends Annotation>> annotationsToRemove(Annotated annotated, Annotation[] declaredAnnotations) {
         return annotationsToRemove(Arrays.asList(declaredAnnotations), annotated);
     }
 
     private String setterNameFromGetter(Method getter) {
         return "set" + capitalize(fieldNameFromGetter(getter));
+    }
+
+    private String fieldNameFromGetter(Method getter) {
+        String methodName = getter.getName();
+        if (methodName.startsWith("get")) {
+            return uncapitalize(methodName.substring(3));
+        } else {
+            return uncapitalize(methodName.substring(2));
+        }
     }
 
     private String capitalize(String str) {
@@ -304,15 +315,6 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
             return Character.isLowerCase(firstChar) ? str : (new StringBuilder(strLen)).append(Character.toLowerCase(firstChar)).append(str.substring(1)).toString();
         } else {
             return str;
-        }
-    }
-
-    private String fieldNameFromGetter(Method getter) {
-        String methodName = getter.getName();
-        if (methodName.startsWith("get")) {
-            return uncapitalize(methodName.substring(3));
-        } else {
-            return uncapitalize(methodName.substring(2));
         }
     }
 }
