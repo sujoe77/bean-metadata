@@ -21,18 +21,15 @@ package com.afrunt.beanmetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author Andrii Frunt
  */
-public class FieldMetadata implements Annotated {
+public class FieldMetadata implements Annotated, Typed {
     private String name;
-    private Class<?> fieldType;
+    private Class<?> type;
     private Method getter;
     private Method setter;
     private Set<Annotation> annotations = new HashSet<>();
@@ -47,12 +44,12 @@ public class FieldMetadata implements Annotated {
         return this;
     }
 
-    public Class<?> getFieldType() {
-        return fieldType;
+    public Class<?> getType() {
+        return type;
     }
 
-    public FieldMetadata setFieldType(Class<?> fieldType) {
-        this.fieldType = fieldType;
+    public FieldMetadata setType(Class<?> type) {
+        this.type = type;
         return this;
     }
 
@@ -87,93 +84,13 @@ public class FieldMetadata implements Annotated {
         return this;
     }
 
-    public String getRecordClassName() {
+    public String getBeanClassName() {
         return recordClassName;
     }
 
-    public FieldMetadata setRecordClassName(String recordClassName) {
+    public FieldMetadata setBeanClassName(String recordClassName) {
         this.recordClassName = recordClassName;
         return this;
-    }
-
-    public boolean isString() {
-        return typeIs(String.class);
-    }
-
-    public boolean isNumber() {
-        return Number.class.isAssignableFrom(getFieldType());
-    }
-
-    public boolean isShort() {
-        return typeIs(Short.class) || isPrimitiveWithName("short");
-    }
-
-    public boolean isInteger() {
-        return typeIs(Integer.class) || isPrimitiveWithName("int");
-    }
-
-    public boolean isDouble() {
-        return typeIs(Double.class) || isPrimitiveWithName("double");
-    }
-
-    public boolean isBigInteger() {
-        return typeIs(BigInteger.class);
-    }
-
-    public boolean isLong() {
-        return typeIs(Long.class) || isPrimitiveWithName("long");
-    }
-
-    public boolean isFloat() {
-        return typeIs(Float.class) || isPrimitiveWithName("float");
-    }
-
-    public boolean isByte() {
-        return typeIs(Byte.class) || isPrimitiveWithName("byte");
-    }
-
-    public boolean isBoolean() {
-        return typeIs(Boolean.class) || isPrimitiveWithName("boolean");
-    }
-
-    public boolean isBigDecimal() {
-        return typeIs(BigDecimal.class);
-    }
-
-    public boolean isDate() {
-        return typeIs(Date.class);
-    }
-
-    public boolean isPrimitiveWithName(String name) {
-        return isPrimitive() && typeNameIs(name);
-    }
-
-    public boolean isPrimitive() {
-        return getFieldType().isPrimitive();
-    }
-
-    public boolean isFractional() {
-        return isNumber() && (typeIs(Double.class) || typeIs(BigDecimal.class) || typeIs(Float.class));
-    }
-
-    public boolean typeIsAssignableFrom(Class<?> cl) {
-        return typeIs(cl) || getFieldType().isAssignableFrom(cl) || compatiblePrimitives(getFieldType(), cl);
-    }
-
-    private boolean compatiblePrimitives(Class<?> fieldType, Class<?> cl) {
-        return ClassUtil.isCompatiblePrimitives(fieldType, cl);
-    }
-
-    public boolean isAssignableFromType(Class<?> cl) {
-        return cl.isAssignableFrom(getFieldType());
-    }
-
-    public boolean typeNameIs(String name) {
-        return getFieldType().getName().equals(name);
-    }
-
-    public boolean typeIs(Class<?> fieldType) {
-        return fieldType.equals(getFieldType());
     }
 
     public <T> T applyValue(T instance, Object value) {
@@ -200,7 +117,7 @@ public class FieldMetadata implements Annotated {
 
     @Override
     public String toString() {
-        String typeName = fieldType.getName();
+        String typeName = type.getName();
         String className = recordClassName.substring(recordClassName.lastIndexOf(".") + 1);
         return className + "->" + this.name + "[" + typeName.substring(typeName.lastIndexOf('.') + 1) + "] ";
     }

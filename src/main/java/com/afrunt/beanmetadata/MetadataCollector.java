@@ -107,7 +107,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     protected FM collectFieldMetadata(Class<?> cl, Method getter, FM fieldMetadata) {
-        fieldMetadata.setRecordClassName(cl.getName());
+        fieldMetadata.setBeanClassName(cl.getName());
         Annotation[] declaredAnnotations = getter.getDeclaredAnnotations();
         fieldMetadata = handleAnnotations(fieldMetadata, declaredAnnotations);
         fieldMetadata.setSetter(ofNullable(findSetterForGetter(cl, getter)).orElse(fieldMetadata.getSetter()));
@@ -192,7 +192,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         for (Method getter : getters) {
             String fieldName = fieldNameFromGetter(getter);
             FM fm = beanMetadata.getOrCreateFieldMetadataByName(fieldName, newFieldMetadata());
-            fm.setFieldType(getter.getReturnType());
+            fm.setType(getter.getReturnType());
             fm.setGetter(getter);
 
             fm = collectFieldMetadata(cl, getter, fm);

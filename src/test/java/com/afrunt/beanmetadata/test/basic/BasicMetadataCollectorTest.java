@@ -141,8 +141,8 @@ public class BasicMetadataCollectorTest {
         FieldMetadata fm = bm.getFieldMetadata(name);
         assertTrue(fm.isAnnotatedWithAll(annotations));
         assertEquals(annotations.length, fm.getAnnotations().size());
-        assertEquals(fieldType, fm.getFieldType());
-        assertEquals(bm.getType().getName(), fm.getRecordClassName());
+        assertEquals(fieldType, fm.getType());
+        assertEquals(bm.getType().getName(), fm.getBeanClassName());
         assertNotNull(fm.getGetter());
         assertEquals(fm.getSetter() == null, fm.isReadOnly());
         assertTrue(fm.typeIs(fieldType));

@@ -21,7 +21,6 @@ package com.afrunt.beanmetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * @author Andrii Frunt
  */
-public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
+public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed {
     private Class<?> type;
 
     private Map<String, FM> fieldsMetadataMap = new HashMap<>();
@@ -45,10 +44,6 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
     public BeanMetadata setType(Class<?> type) {
         this.type = type;
         return this;
-    }
-
-    public boolean typeIs(Class<?> type) {
-        return type.equals(getType());
     }
 
     public boolean typeIsAssignableFrom(Class<?> type) {
@@ -69,14 +64,6 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated {
         } catch (Exception e) {
             throw new BeanMetadataException();
         }
-    }
-
-    public boolean isAbstract() {
-        return Modifier.isAbstract(getTypeModifiers());
-    }
-
-    public int getTypeModifiers() {
-        return getType().getModifiers();
     }
 
     public Object beanFromMap(Map<String, Object> fieldsValues) {
