@@ -1,5 +1,6 @@
 # bean-metadata
 It is the simple library, that helps you to collect metadata of the java-beans.
+[jACH project](https://github.com/afrunt/jach) is built on top of this framework, so there you can find the best example of use 
 
 Add bean-metadata to your project. for maven projects just add this dependency:
 ```xml
