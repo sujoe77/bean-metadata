@@ -164,7 +164,8 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
     @SuppressWarnings("unchecked")
     private Collection<Class<? extends Annotation>> annotationsToRemove(Collection<Annotation> declaredAnnotations, Annotated annotated) {
-        RemoveInheritedAnnotations removeInherited = (RemoveInheritedAnnotations) declaredAnnotations.stream().filter(a -> a instanceof RemoveInheritedAnnotations).findFirst().orElse(null);
+        RemoveInheritedAnnotations removeInherited = (RemoveInheritedAnnotations) declaredAnnotations.stream()
+                .filter(a -> a.annotationType().equals(RemoveInheritedAnnotations.class)).findFirst().orElse(null);
 
         if (removeInherited != null) {
             boolean removeAllAnnotations = removeInherited.removeOnly().length == 0;
@@ -216,7 +217,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     protected boolean isSkippedAnnotation(Annotation annotation) {
-        return annotation instanceof RemoveInheritedAnnotations;
+        return annotation.annotationType().equals(RemoveInheritedAnnotations.class);
     }
 
     protected boolean isValidGetter(Method m) {
