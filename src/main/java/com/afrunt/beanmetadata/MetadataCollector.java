@@ -45,8 +45,10 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
         beansMetadata.forEach(this::validateBeanMetadata);
 
-        beansMetadata.stream().map(BeanMetadata::getFieldsMetadata)
-                .flatMap(Set::stream).forEach(this::validateFieldMetadata);
+        beansMetadata.stream()
+                .map(BeanMetadata::getFieldsMetadata)
+                .flatMap(Set::stream)
+                .forEach(this::validateFieldMetadata);
 
         metadata.setBeansMetadata(
                 beansMetadata
