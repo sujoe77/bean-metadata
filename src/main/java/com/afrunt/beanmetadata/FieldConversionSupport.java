@@ -48,6 +48,10 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
             return value;
         }
 
+        if (converterMethod == null && value != null && toType.equals(String.class)) {
+            return String.valueOf(value);
+        }
+
         if (converterMethod == null) {
             String methodString = methodString(converterMethodName, fromType, toType, otherParamTypes);
             throw new BeanMetadataException(what + " converter method not found " + methodString);

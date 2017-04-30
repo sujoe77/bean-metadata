@@ -26,9 +26,9 @@ public class FieldConversionSupportTest {
         Assert.assertEquals(1, stringFieldConverted);
 
         try {
-            supportsFieldConversion.fieldToValue(1, String.class,  beanMetadata, beanMetadata.getFieldMetadata("integerField"));
-            Assert.fail("We do not have converter method fieldIntegerToString");
+            supportsFieldConversion.fieldToValue(1, String.class, beanMetadata, beanMetadata.getFieldMetadata("integerField"));
         } catch (Exception e) {
+            Assert.fail("We do not have converter method fieldIntegerToString, but non-null values could be converted to string by default");
             e.printStackTrace();
         }
     }
