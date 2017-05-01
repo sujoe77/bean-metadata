@@ -26,6 +26,10 @@ import java.util.stream.Collectors;
  * @author Andrii Frunt
  */
 public interface Annotated {
+    Map<Class<? extends Annotation>, Annotation> getAnnotationsMap();
+
+    Annotated setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap);
+
     default Set<Annotation> getAnnotations() {
         return new HashSet<>(getAnnotationsMap().values());
     }
@@ -38,10 +42,6 @@ public interface Annotated {
         setAnnotationsMap(map);
         return this;
     }
-
-    Map<Class<? extends Annotation>, Annotation> getAnnotationsMap();
-
-    Annotated setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap);
 
     default Collection<Class<? extends Annotation>> getAnnotationTypes() {
         return new HashSet<>(getAnnotationsMap().keySet());
