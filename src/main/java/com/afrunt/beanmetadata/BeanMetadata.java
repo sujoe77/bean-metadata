@@ -35,7 +35,7 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
 
     private Map<String, FM> fieldsMetadataMap = new HashMap<>();
 
-    private Set<Annotation> annotations = new HashSet<>();
+    private Map<Class<? extends Annotation>, Annotation> annotationsMap = new HashMap<>();
 
     public Class<?> getType() {
         return type;
@@ -183,12 +183,14 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         }
     }
 
-    public Set<Annotation> getAnnotations() {
-        return annotations;
+    @Override
+    public Map<Class<? extends Annotation>, Annotation> getAnnotationsMap() {
+        return annotationsMap;
     }
 
-    public BeanMetadata setAnnotations(Set<Annotation> annotations) {
-        this.annotations = annotations;
+    @Override
+    public BeanMetadata<FM> setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap) {
+        this.annotationsMap = annotationsMap;
         return this;
     }
 

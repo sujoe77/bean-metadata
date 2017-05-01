@@ -22,32 +22,33 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-
 /**
  * @author Andrii Frunt
  */
 public interface Annotated {
-    Set<Annotation> getAnnotations();
+    default Set<Annotation> getAnnotations() {
+        return new HashSet<>(getAnnotationsMap().values());
+    }
 
-    Annotated setAnnotations(Set<Annotation> annotations);
+    default Annotated setAnnotations(Set<Annotation> annotations) {
+        Map<Class<? extends Annotation>, Annotation> map = new HashMap<>();
+        for (Annotation a : annotations) {
+            map.put(a.annotationType(), a);
+        }
+        setAnnotationsMap(map);
+        return this;
+    }
+
+    Map<Class<? extends Annotation>, Annotation> getAnnotationsMap();
+
+    Annotated setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap);
 
     default Collection<Class<? extends Annotation>> getAnnotationTypes() {
-        if (getAnnotations() != null) {
-            return getAnnotations().stream()
-                    .map(Annotation::annotationType)
-                    .collect(Collectors.toList());
-        } else {
-            return Collections.emptyList();
-        }
+        return new HashSet<>(getAnnotationsMap().keySet());
     }
 
     default <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        return ofNullable(getAnnotations()).orElse(Collections.emptySet()).stream()
-                .filter(a -> a.annotationType().equals(annotationType))
-                .map(a -> (T) a)
-                .findFirst()
-                .orElse(null);
+        return (T) getAnnotationsMap().get(annotationType);
     }
 
     default <T extends Annotation> Optional<T> getOptionalAnnotation(Class<T> annotationType) {
@@ -55,10 +56,9 @@ public interface Annotated {
     }
 
     default Annotated addAnnotation(Annotation annotation) {
-        Set<Annotation> annotations = new HashSet<>(getAnnotations());
-        annotations.remove(getAnnotation(annotation.annotationType()));
-        annotations.add(annotation);
-        setAnnotations(annotations);
+        HashMap<Class<? extends Annotation>, Annotation> map = new HashMap<>(getAnnotationsMap());
+        map.put(annotation.annotationType(), annotation);
+        setAnnotationsMap(map);
         return this;
     }
 
@@ -74,9 +74,9 @@ public interface Annotated {
 
     default <T extends Annotation> T removeAnnotation(Class<T> annotationType) {
         T annotation = getAnnotation(annotationType);
-        HashSet<Annotation> annotations = new HashSet<>(getAnnotations());
-        annotations.remove(annotation);
-        setAnnotations(annotations);
+        HashMap<Class<? extends Annotation>, Annotation> map = new HashMap<>(getAnnotationsMap());
+        map.remove(annotationType);
+        setAnnotationsMap(map);
         return annotation;
     }
 
@@ -88,7 +88,7 @@ public interface Annotated {
 
     default Set<Annotation> removeAllAnnotations() {
         Set<Annotation> annotations = getAnnotations();
-        setAnnotations(new HashSet<>());
+        setAnnotationsMap(new HashMap<>());
         return annotations;
     }
 
@@ -98,9 +98,7 @@ public interface Annotated {
 
     @SuppressWarnings("unchecked")
     default boolean isAnnotatedWithAll(Class<? extends Annotation>... annotations) {
-        return Arrays.stream(annotations)
-                .map(this::isAnnotatedWith)
-                .reduce(true, (left, right) -> left && right);
+        return getAnnotationsMap().keySet().containsAll(Arrays.asList(annotations));
     }
 
     default boolean notAnnotatedWith(Class<? extends Annotation> annotation) {

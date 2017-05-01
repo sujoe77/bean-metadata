@@ -21,8 +21,8 @@ package com.afrunt.beanmetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Andrii Frunt
@@ -32,8 +32,19 @@ public class FieldMetadata implements Annotated, Typed {
     private Class<?> type;
     private Method getter;
     private Method setter;
-    private Set<Annotation> annotations = new HashSet<>();
     private String recordClassName;
+    private Map<Class<? extends Annotation>, Annotation> annotationsMap = new HashMap<>();
+
+    @Override
+    public Map<Class<? extends Annotation>, Annotation> getAnnotationsMap() {
+        return annotationsMap;
+    }
+
+    @Override
+    public FieldMetadata setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap) {
+        this.annotationsMap = annotationsMap;
+        return this;
+    }
 
     public String getName() {
         return name;
@@ -73,15 +84,6 @@ public class FieldMetadata implements Annotated, Typed {
 
     public boolean isReadOnly() {
         return setter == null;
-    }
-
-    public Set<Annotation> getAnnotations() {
-        return annotations;
-    }
-
-    public FieldMetadata setAnnotations(Set<Annotation> annotations) {
-        this.annotations = annotations;
-        return this;
     }
 
     public String getBeanClassName() {
