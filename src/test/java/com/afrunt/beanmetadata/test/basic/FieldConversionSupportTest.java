@@ -1,22 +1,24 @@
 package com.afrunt.beanmetadata.test.basic;
 
-import com.afrunt.beanmetadata.*;
+import com.afrunt.beanmetadata.BeanMetadata;
+import com.afrunt.beanmetadata.FieldConversionSupport;
+import com.afrunt.beanmetadata.FieldMetadata;
+import com.afrunt.beanmetadata.Metadata;
 import com.afrunt.beanmetadata.test.basic.domain.ConversionBean;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Andrii Frunt
  */
-public class FieldConversionSupportTest {
-    public static final java.util.List<Class<?>> BEANS = Arrays.asList(ConversionBean.class);
+public class FieldConversionSupportTest extends BasicTest {
 
     @Test
     public void testMetadataCollection() {
-        BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
-        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = metadataCollector.collectMetadata(BEANS);
+        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = getMetadata();
         SupportsFieldConversion supportsFieldConversion = new SupportsFieldConversion();
 
         BeanMetadata<FieldMetadata> beanMetadata = metadata.getBeanMetadata(ConversionBean.class);
@@ -31,6 +33,11 @@ public class FieldConversionSupportTest {
             Assert.fail("We do not have converter method fieldIntegerToString, but non-null values could be converted to string by default");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected Collection<Class<?>> classes() {
+        return Collections.singletonList(ConversionBean.class);
     }
 
     public static class SupportsFieldConversion implements FieldConversionSupport<BeanMetadata<FieldMetadata>, FieldMetadata> {

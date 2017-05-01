@@ -120,4 +120,8 @@ public interface Typed {
     default boolean isAbstract() {
         return Modifier.isAbstract(getTypeModifiers());
     }
+
+    default boolean isEnum() {
+        return getType().isEnum();
+    }
 }

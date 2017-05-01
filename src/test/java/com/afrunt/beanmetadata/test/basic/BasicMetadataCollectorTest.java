@@ -38,13 +38,10 @@ import static org.junit.Assert.*;
 /**
  * @author Andrii Frunt
  */
-public class BasicMetadataCollectorTest {
-    public static final java.util.List<Class<?>> BEANS = Arrays.asList(Bean.class, SecondBean.class);
-
+public class BasicMetadataCollectorTest extends BasicTest {
     @Test
     public void testMetadataCollection() {
-        BasicMetadataCollector metadataCollector = new BasicMetadataCollector();
-        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = metadataCollector.collectMetadata(BEANS);
+        Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> metadata = getMetadata();
 
         Set<BeanMetadata<FieldMetadata>> beansMetadata = metadata.getBeansMetadata();
 
@@ -156,4 +153,8 @@ public class BasicMetadataCollectorTest {
     }
 
 
+    @Override
+    protected Collection<Class<?>> classes() {
+        return Arrays.asList(Bean.class, SecondBean.class);
+    }
 }
