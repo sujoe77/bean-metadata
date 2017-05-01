@@ -32,19 +32,16 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
     }
 
     default Method getConverterMethod(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
-        List<Class<?>> paramTypes = new ArrayList<>();
-        paramTypes.add(fromType);
-        paramTypes.addAll(otherParamTypes);
-
-        int methodHashCode = 31 * methodName.hashCode();
-        methodHashCode = methodHashCode * 31 + fromType.hashCode();
-        methodHashCode = methodHashCode * 31 + toType.hashCode();
-        methodHashCode = methodHashCode * 31 + otherParamTypes.hashCode();
+        int methodHashCode = getMehodHashCode(methodName, fromType, toType, otherParamTypes);
 
         Map<Integer, Method> methodsCache = getMethodsCache();
         if (methodsCache.containsKey(methodHashCode)) {
             return methodsCache.get(methodHashCode);
         }
+
+        List<Class<?>> paramTypes = new ArrayList<>();
+        paramTypes.add(fromType);
+        paramTypes.addAll(otherParamTypes);
 
         Method[] methods = getClass().getMethods();
 
@@ -58,6 +55,13 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
         methodsCache.put(methodHashCode, method);
 
         return method;
+    }
+
+    default int getMehodHashCode(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
+        int methodHashCode = 31 * methodName.hashCode();
+        methodHashCode = methodHashCode * 31 + fromType.hashCode();
+        methodHashCode = methodHashCode * 31 + toType.hashCode();
+        return methodHashCode * 31 + otherParamTypes.hashCode();
     }
 
     default Object fieldToValue(Object value, Class<?> toType, BM beanMetadata, FM fieldMetadata) {
