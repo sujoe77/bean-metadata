@@ -47,6 +47,7 @@ public interface Annotated {
         return new HashSet<>(getAnnotationsMap().keySet());
     }
 
+    @SuppressWarnings("unchecked")
     default <T extends Annotation> T getAnnotation(Class<T> annotationType) {
         return (T) getAnnotationsMap().get(annotationType);
     }
