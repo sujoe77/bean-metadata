@@ -32,7 +32,7 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
     }
 
     default Method getConverterMethod(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
-        int methodHashCode = getMehodHashCode(methodName, fromType, toType, otherParamTypes);
+        int methodHashCode = getMethodHashCode(methodName, fromType, toType, otherParamTypes);
 
         Map<Integer, Method> methodsCache = getMethodsCache();
         if (methodsCache.containsKey(methodHashCode)) {
@@ -57,7 +57,7 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
         return method;
     }
 
-    default int getMehodHashCode(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
+    default int getMethodHashCode(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
         int methodHashCode = 31 * methodName.hashCode();
         methodHashCode = methodHashCode * 31 + fromType.hashCode();
         methodHashCode = methodHashCode * 31 + toType.hashCode();
