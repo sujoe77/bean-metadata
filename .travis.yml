@@ -1,3 +1,4 @@
+#Travis configuration
 language: java
 
 jdk:
