@@ -39,8 +39,10 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
         int methodHashCode = getMethodHashCode(methodName, fromType, toType, otherParamTypes);
 
         Map<Integer, Method> methodsCache = getMethodsCache();
-        if (methodsCache.containsKey(methodHashCode)) {
-            return methodsCache.get(methodHashCode);
+        Method method = methodsCache.get(methodHashCode);
+
+        if (method != null || methodsCache.containsKey(methodHashCode)) {
+            return method;
         }
 
         List<Class<?>> paramTypes = new ArrayList<>();
@@ -49,7 +51,7 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
 
         Method[] methods = getClass().getMethods();
 
-        Method method = Arrays.stream(methods)
+        method = Arrays.stream(methods)
                 .filter(m -> m.getName().equals(methodName))
                 .filter(m -> methodParametersTypesAre(m, paramTypes))
                 .filter(m -> m.getReturnType().equals(toType))
@@ -108,11 +110,12 @@ public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends 
         methodNameHashCode = methodNameHashCode * 31 + toType.hashCode();
 
         Map<Integer, String> methodNamesCache = getMethodNamesCache();
-        if (methodNamesCache.containsKey(methodNameHashCode)) {
-            return methodNamesCache.get(methodNameHashCode);
+        String methodName = methodNamesCache.get(methodNameHashCode);
+        if (methodName != null || methodNamesCache.containsKey(methodNameHashCode)) {
+            return methodName;
         }
 
-        String methodName = whatToConvert + fromType.getSimpleName() + "To" + toType.getSimpleName();
+        methodName = whatToConvert + fromType.getSimpleName() + "To" + toType.getSimpleName();
         methodNamesCache.put(methodNameHashCode, methodName);
         return methodName;
     }
