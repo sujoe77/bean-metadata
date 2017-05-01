@@ -1,4 +1,4 @@
-# bean-metadata
+# bean-metadata [![Build Status](https://travis-ci.org/afrunt/bean-metadata.svg?branch=master)](https://travis-ci.org/afrunt/bean-metadata)
 It is the simple library, that helps you to collect metadata of the java-beans.
 [jACH project](https://github.com/afrunt/jach) is built on top of this framework, so there you can find the best example of use 
 
