@@ -8,8 +8,11 @@ import com.afrunt.beanmetadata.test.basic.domain.ConversionBean;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Andrii Frunt
@@ -41,6 +44,13 @@ public class FieldConversionSupportTest extends BasicTest {
     }
 
     public static class SupportsFieldConversion implements FieldConversionSupport<BeanMetadata<FieldMetadata>, FieldMetadata> {
+        private Map<Integer, Method> methodsCache = new HashMap<>();
+
+        @Override
+        public Map<Integer, Method> getMethodsCache() {
+            return methodsCache;
+        }
+
         public Integer fieldStringToInteger(String value, BeanMetadata<FieldMetadata> bm, FieldMetadata fm) {
             return Integer.valueOf(value);
         }

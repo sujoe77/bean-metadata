@@ -20,28 +20,44 @@ package com.afrunt.beanmetadata;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Andrii Frunt
  */
 public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends FieldMetadata> {
 
+    default Map<Integer, Method> getMethodsCache() {
+        return new HashMap<>();
+    }
+
     default Method getConverterMethod(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
         List<Class<?>> paramTypes = new ArrayList<>();
         paramTypes.add(fromType);
         paramTypes.addAll(otherParamTypes);
 
+        int methodHashCode = 31 * methodName.hashCode();
+        methodHashCode = methodHashCode * 31 + fromType.hashCode();
+        methodHashCode = methodHashCode * 31 + toType.hashCode();
+        methodHashCode = methodHashCode * 31 + otherParamTypes.hashCode();
+
+        Map<Integer, Method> methodsCache = getMethodsCache();
+        if (methodsCache.containsKey(methodHashCode)) {
+            return methodsCache.get(methodHashCode);
+        }
+
         Method[] methods = getClass().getMethods();
 
-        return Arrays.stream(methods)
+        Method method = Arrays.stream(methods)
                 .filter(m -> m.getName().equals(methodName))
                 .filter(m -> methodParametersTypesAre(m, paramTypes))
                 .filter(m -> m.getReturnType().equals(toType))
                 .findFirst()
                 .orElse(null);
+
+        methodsCache.put(methodHashCode, method);
+
+        return method;
     }
 
     default Object fieldToValue(Object value, Class<?> toType, BM beanMetadata, FM fieldMetadata) {

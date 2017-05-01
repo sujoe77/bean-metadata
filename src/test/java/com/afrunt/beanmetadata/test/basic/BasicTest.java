@@ -16,7 +16,7 @@ public abstract class BasicTest {
 
     protected abstract Collection<Class<?>> classes();
 
-    protected Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> getMetadata(){
+    protected Metadata<BeanMetadata<FieldMetadata>, FieldMetadata> getMetadata() {
         if (metadata == null) {
             metadata = new BasicMetadataCollector().collectMetadata(classes());
         }
