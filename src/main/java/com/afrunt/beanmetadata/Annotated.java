@@ -83,7 +83,7 @@ public interface Annotated {
 
     default Set<? extends Annotation> removeAnnotations(Collection<Class<? extends Annotation>> annotationTypes) {
         return annotationTypes.stream()
-                .map(this::removeAnnotation)
+                .map(a -> (Annotation) removeAnnotation(a))
                 .collect(Collectors.toSet());
     }
 
