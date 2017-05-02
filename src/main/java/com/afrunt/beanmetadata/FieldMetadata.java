@@ -95,6 +95,14 @@ public class FieldMetadata implements Annotated, Typed {
         return this;
     }
 
+    public Object getValue(Object instance) {
+        try {
+            return getGetter().invoke(instance);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new BeanMetadataException("Error getting value from field " + this);
+        }
+    }
+
     public <T> T applyValue(T instance, Object value) {
         if (!isReadOnly()) {
             try {

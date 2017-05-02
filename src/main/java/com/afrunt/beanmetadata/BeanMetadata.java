@@ -171,6 +171,24 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         return fm;
     }
 
+    public Object getFieldValue(Object instance, FM fm) {
+        if (fm == null) {
+            throw new BeanMetadataException("Field not found");
+        }
+
+        return fm.getValue(instance);
+    }
+
+    public Object getFieldValue(Object instance, String fieldName) {
+        FM fm = getFieldMetadata(fieldName);
+
+        if (fm == null) {
+            throw new BeanMetadataException("Field not found " + fieldName);
+        }
+
+        return getFieldValue(instance, fm);
+    }
+
     public <T> T applyFieldValue(T instance, String fieldName, Object value) {
         return applyFieldValue(instance, getFieldMetadata(fieldName), value);
     }
