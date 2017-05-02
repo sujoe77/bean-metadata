@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -51,11 +51,11 @@ public class ACHTest {
         assertTrue(headerMetadata.isAnnotatedWith(ACHRecordType.class));
         assertEquals(1, headerMetadata.getAnnotations().size());
 
-        Set<ACHFieldMetadata> allFieldsMetadata = headerMetadata.getFieldsMetadata();
+        List<ACHFieldMetadata> allFieldsMetadata = headerMetadata.getFieldsMetadata();
 
         assertEquals(17, allFieldsMetadata.size());
 
-        Set<ACHFieldMetadata> achFieldsMetadata = headerMetadata.getACHFieldsMetadata();
+        List<ACHFieldMetadata> achFieldsMetadata = headerMetadata.getACHFieldsMetadata();
         assertEquals(13, achFieldsMetadata.size());
 
         ACHFieldMetadata fileCreationDate = headerMetadata.getFieldMetadata("fileCreationDate");

@@ -21,13 +21,13 @@ package com.afrunt.beanmetadata.test.ach.metadata;
 import com.afrunt.beanmetadata.BeanMetadata;
 import com.afrunt.beanmetadata.test.ach.annotation.ACHField;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Andrii Frunt
  */
 public class ACHBeanMetadata extends BeanMetadata<ACHFieldMetadata> {
-    public Set<ACHFieldMetadata> getACHFieldsMetadata() {
+    public List<ACHFieldMetadata> getACHFieldsMetadata() {
         return getFieldsAnnotatedWith(ACHField.class);
     }
 

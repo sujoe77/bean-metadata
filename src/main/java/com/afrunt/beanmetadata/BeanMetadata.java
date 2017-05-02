@@ -21,10 +21,7 @@ package com.afrunt.beanmetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -119,11 +116,11 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         }
     }
 
-    public Set<FM> getFieldsMetadata() {
-        return new HashSet<>(fieldsMetadataMap.values());
+    public List<FM> getFieldsMetadata() {
+        return new ArrayList<>(fieldsMetadataMap.values());
     }
 
-    public BeanMetadata setFieldsMetadata(Set<FM> fieldsMetadata) {
+    public BeanMetadata setFieldsMetadata(List<FM> fieldsMetadata) {
         fieldsMetadataMap = new HashMap<>();
         fieldsMetadata.forEach(fm -> fieldsMetadataMap.put(fm.getName(), fm));
         return this;
@@ -143,10 +140,10 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         return new HashSet<>(fieldsMetadataMap.keySet());
     }
 
-    public Set<FM> getFieldsAnnotatedWith(Class<? extends Annotation> annotation) {
+    public List<FM> getFieldsAnnotatedWith(Class<? extends Annotation> annotation) {
         return getFieldsMetadata().stream()
                 .filter(fm -> fm.isAnnotatedWith(annotation))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     public boolean hasField(String fieldName) {
@@ -157,14 +154,14 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         fieldsMetadataMap.put(fm.getName(), fm);
     }
 
-    public void addFieldsMetadata(Set<FM> fms) {
+    public void addFieldsMetadata(List<FM> fms) {
         fms.forEach(this::addFieldMetadata);
     }
 
     public FM removeFieldMetadata(String fieldName) {
         FM fm = getFieldMetadata(fieldName);
         if (fm != null) {
-            HashSet<FM> fms = new HashSet<>(getFieldsMetadata());
+            List<FM> fms = new ArrayList<>(getFieldsMetadata());
             fms.remove(fm);
             setFieldsMetadata(fms);
         }

@@ -47,7 +47,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
         beansMetadata.stream()
                 .map(BeanMetadata::getFieldsMetadata)
-                .flatMap(Set::stream)
+                .flatMap(List::stream)
                 .forEach(this::validateFieldMetadata);
 
         metadata.setBeansMetadata(
@@ -190,8 +190,8 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
                 .collect(Collectors.toSet());
     }
 
-    protected Set<FM> collectFieldsMetadata(Class<?> cl, Set<Method> getters, BM beanMetadata) {
-        Set<FM> result = new HashSet<>();
+    protected List<FM> collectFieldsMetadata(Class<?> cl, Set<Method> getters, BM beanMetadata) {
+        List<FM> result = new ArrayList<>();
         for (Method getter : getters) {
             String fieldName = fieldNameFromGetter(getter);
             FM fm = beanMetadata.getOrCreateFieldMetadataByName(fieldName, newFieldMetadata());

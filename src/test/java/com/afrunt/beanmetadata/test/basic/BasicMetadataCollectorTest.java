@@ -125,8 +125,8 @@ public class BasicMetadataCollectorTest extends BasicTest {
 
         testFieldMetadata(bm, "id", String.class, new Class[]{FieldAnnotation.class, AnotherFieldAnnotation.class});
         testFieldMetadata(bm, "value", String.class, new Class[]{FieldAnnotation.class});
-        HashSet<FieldMetadata> emptyFields = new HashSet<>();
-        Set<FieldMetadata> fieldsMetadata = bm.getFieldsMetadata();
+        List<FieldMetadata> emptyFields = new ArrayList<>();
+        List<FieldMetadata> fieldsMetadata = bm.getFieldsMetadata();
 
         bm.setFieldsMetadata(emptyFields);
         assertEquals(emptyFields, bm.getFieldsMetadata());
