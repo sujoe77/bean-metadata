@@ -22,7 +22,7 @@
 
     <groupId>com.afrunt</groupId>
     <artifactId>bean-metadata</artifactId>
-    <version>0.1-dev</version>
+    <version>0.1.2-dev</version>
 
     <name>Bean-Metadata</name>
     <description>Open source library for java beans metadata collection</description>
