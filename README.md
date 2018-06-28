@@ -7,7 +7,7 @@ Add bean-metadata to your project. for maven projects just add this dependency:
 <dependency>
   <groupId>com.afrunt</groupId>
   <artifactId>bean-metadata</artifactId>
-  <version>0.2</version>
+  <version>0.4</version>
 </dependency>
 ```
 

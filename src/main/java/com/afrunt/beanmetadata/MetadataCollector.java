@@ -229,7 +229,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         boolean plainGetterName = name.startsWith("get") && !"".equals(name.replaceFirst("get", ""));
 
         boolean booleanGetterName = name.startsWith("is") && !"".equals(name.replaceFirst("is", ""))
-                && (Boolean.class.equals(returnType) || "boolean".equals(returnType.getName()));
+                && isBooleanReturnType(returnType);
 
         boolean nameIsValid = plainGetterName || booleanGetterName;
 
@@ -237,6 +237,11 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
                 && isPublic(m)
                 && !returnType.equals(Void.class)
                 && m.getParameterCount() == 0;
+    }
+
+    private boolean isBooleanReturnType(Class<?> returnType) {
+        String returnTypeName = returnType.getName();
+        return Boolean.class.equals(returnType) || "boolean".equals(returnTypeName);
     }
 
     protected List<Class<?>> classHierarchy(Class<?> cl) {
