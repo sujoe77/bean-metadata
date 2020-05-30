@@ -18,110 +18,57 @@
  */
 package com.afrunt.beanmetadata;
 
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Date;
-
 /**
  * @author Andrii Frunt
  */
 public interface Typed {
     Class<?> getType();
 
-    default boolean typeIs(Class<?> type) {
-        return type.equals(getType());
-    }
+    boolean typeIs(Class<?> type);
 
-    default boolean typeIsAssignableFrom(Class<?> cl) {
-        return typeIs(cl) || getType().isAssignableFrom(cl) || isCompatiblePrimitives(getType(), cl);
-    }
+    boolean typeIsAssignableFrom(Class<?> cl);
 
-    default boolean typeNameIs(String name) {
-        return getType().getName().equals(name);
-    }
+    boolean typeNameIs(String name);
 
-    default boolean isCompatiblePrimitives(Class<?> fieldType, Class<?> cl) {
-        return ClassUtil.isCompatiblePrimitives(fieldType, cl);
-    }
+    boolean isCompatiblePrimitives(Class<?> fieldType, Class<?> cl);
 
-    default String getTypeName() {
-        return getType().getName();
-    }
+    String getTypeName();
 
-    default String getSimpleTypeName() {
-        return getType().getSimpleName();
-    }
+    String getSimpleTypeName();
 
-    default boolean isString() {
-        return typeIs(String.class);
-    }
+    boolean isString();
 
-    default boolean isNumber() {
-        return Number.class.isAssignableFrom(getType());
-    }
+    boolean isNumber();
 
-    default boolean isFractional() {
-        return isNumber() && (isDouble() || isBigDecimal() || isFloat());
-    }
+    boolean isFractional();
 
-    default boolean isShort() {
-        return typeIs(Short.class) || isPrimitiveWithName("short");
-    }
+    boolean isShort();
 
-    default boolean isInteger() {
-        return typeIs(Integer.class) || isPrimitiveWithName("int");
-    }
+    boolean isInteger();
 
-    default boolean isDouble() {
-        return typeIs(Double.class) || isPrimitiveWithName("double");
-    }
+    boolean isDouble();
 
-    default boolean isLong() {
-        return typeIs(Long.class) || isPrimitiveWithName("long");
-    }
+    boolean isLong();
 
-    default boolean isFloat() {
-        return typeIs(Float.class) || isPrimitiveWithName("float");
-    }
+    boolean isFloat();
 
-    default boolean isByte() {
-        return typeIs(Byte.class) || isPrimitiveWithName("byte");
-    }
+    boolean isByte();
 
-    default boolean isBoolean() {
-        return typeIs(Boolean.class) || isPrimitiveWithName("boolean");
-    }
+    boolean isBoolean();
 
-    default boolean isBigDecimal() {
-        return typeIs(BigDecimal.class);
-    }
+    boolean isBigDecimal();
 
-    default boolean isBigInteger() {
-        return typeIs(BigInteger.class);
-    }
+    boolean isBigInteger();
 
-    default boolean isDate() {
-        return typeIs(Date.class);
-    }
+    boolean isDate();
 
-    default boolean isPrimitiveWithName(String name) {
-        return isPrimitive() && typeNameIs(name);
-    }
+    boolean isPrimitiveWithName(String name);
 
-    default boolean isPrimitive() {
-        return getType().isPrimitive();
-    }
+    boolean isPrimitive();
 
-    default int getTypeModifiers() {
-        return getType().getModifiers();
-    }
+    int getTypeModifiers();
 
-    default boolean isAbstract() {
-        return Modifier.isAbstract(getTypeModifiers());
-    }
+    boolean isAbstract();
 
-    default boolean isEnum() {
-        return getType().isEnum();
-    }
+    boolean isEnum();
 }

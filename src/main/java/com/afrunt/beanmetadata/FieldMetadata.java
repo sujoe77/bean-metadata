@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @author Andrii Frunt
  */
-public class FieldMetadata implements Annotated, Typed {
+public class FieldMetadata extends AnnotatedBase implements Annotated, Typed {
     private String name;
     private Class<?> type;
     private Method getter;
@@ -55,6 +55,7 @@ public class FieldMetadata implements Annotated, Typed {
         return this;
     }
 
+    @Override
     public Class<?> getType() {
         return type;
     }

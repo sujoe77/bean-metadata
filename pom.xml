@@ -22,7 +22,7 @@
 
     <groupId>com.afrunt</groupId>
     <artifactId>bean-metadata</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>jdk1.7-0.5-SNAPSHOT</version>
 
     <name>Bean-Metadata</name>
     <description>Open source library for java beans metadata collection</description>
@@ -57,9 +57,20 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.sourceforge.streamsupport</groupId>
+            <artifactId>streamsupport</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <version>2.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -82,8 +93,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>

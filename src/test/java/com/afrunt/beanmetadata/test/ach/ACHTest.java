@@ -41,7 +41,7 @@ public class ACHTest {
     @Test
     public void testACHMetadataCollection() {
         ACHMetadataCollector metadataCollector = new ACHMetadataCollector();
-        ACHMetadata metadata = metadataCollector.collectMetadata(Collections.singleton(FileHeader.class));
+        ACHMetadata metadata = metadataCollector.collectMetadata(Collections.<Class<?>>singleton(FileHeader.class));
 
         assertNotNull(metadata);
 

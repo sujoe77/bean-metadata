@@ -27,6 +27,6 @@ public class EnumTest extends BasicTest {
 
     @Override
     protected Collection<Class<?>> classes() {
-        return Collections.singletonList(BeanWithEnumField.class);
+        return Collections.<Class<?>>singletonList(BeanWithEnumField.class);
     }
 }

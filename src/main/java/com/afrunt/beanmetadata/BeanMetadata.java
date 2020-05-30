@@ -18,22 +18,27 @@
  */
 package com.afrunt.beanmetadata;
 
+import java8.util.function.Consumer;
+import java8.util.function.Predicate;
+import java8.util.stream.Collectors;
+import java8.util.stream.StreamSupport;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Andrii Frunt
  */
-public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed {
+public class BeanMetadata<FM extends FieldMetadata> extends AnnotatedBase implements Annotated, Typed {
     private Class<?> type;
 
     private Map<String, FM> fieldsMetadataMap = new HashMap<>();
 
     private Map<Class<? extends Annotation>, Annotation> annotationsMap = new HashMap<>();
 
+    @Override
     public Class<?> getType() {
         return type;
     }
@@ -43,6 +48,7 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         return this;
     }
 
+    @Override
     public boolean typeIsAssignableFrom(Class<?> type) {
         return getType().isAssignableFrom(type);
     }
@@ -122,7 +128,12 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
 
     public BeanMetadata setFieldsMetadata(List<FM> fieldsMetadata) {
         fieldsMetadataMap = new HashMap<>();
-        fieldsMetadata.forEach(fm -> fieldsMetadataMap.put(fm.getName(), fm));
+        StreamSupport.stream(fieldsMetadata).forEach(new Consumer<FM>() {
+            @Override
+            public void accept(FM fm) {
+                fieldsMetadataMap.put(fm.getName(), fm);
+            }
+        });
         return this;
     }
 
@@ -132,7 +143,9 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
 
     public FM getOrCreateFieldMetadataByName(String name, FM fm) {
         fm.setName(name);
-        fieldsMetadataMap.putIfAbsent(name, fm);
+        if (!fieldsMetadataMap.containsKey(name)) {
+            fieldsMetadataMap.put(name, fm);
+        }
         return fieldsMetadataMap.get(name);
     }
 
@@ -140,10 +153,13 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
         return new HashSet<>(fieldsMetadataMap.keySet());
     }
 
-    public List<FM> getFieldsAnnotatedWith(Class<? extends Annotation> annotation) {
-        return getFieldsMetadata().stream()
-                .filter(fm -> fm.isAnnotatedWith(annotation))
-                .collect(Collectors.toList());
+    public List<FM> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
+        return StreamSupport.stream(getFieldsMetadata()).filter(new Predicate<FM>() {
+            @Override
+            public boolean test(FM fm) {
+                return fm.isAnnotatedWith(annotation);
+            }
+        }).collect(Collectors.<FM>toList());
     }
 
     public boolean hasField(String fieldName) {
@@ -155,7 +171,12 @@ public class BeanMetadata<FM extends FieldMetadata> implements Annotated, Typed 
     }
 
     public void addFieldsMetadata(List<FM> fms) {
-        fms.forEach(this::addFieldMetadata);
+        StreamSupport.stream(fms).forEach(new Consumer<FM>() {
+            @Override
+            public void accept(FM fm) {
+                addFieldMetadata(fm);
+            }
+        });
     }
 
     public FM removeFieldMetadata(String fieldName) {

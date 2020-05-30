@@ -1,9 +1,6 @@
 package com.afrunt.beanmetadata.test.basic;
 
-import com.afrunt.beanmetadata.BeanMetadata;
-import com.afrunt.beanmetadata.FieldConversionSupport;
-import com.afrunt.beanmetadata.FieldMetadata;
-import com.afrunt.beanmetadata.Metadata;
+import com.afrunt.beanmetadata.*;
 import com.afrunt.beanmetadata.test.basic.domain.ConversionBean;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,10 +37,10 @@ public class FieldConversionSupportTest extends BasicTest {
 
     @Override
     protected Collection<Class<?>> classes() {
-        return Collections.singletonList(ConversionBean.class);
+        return Collections.<Class<?>>singletonList(ConversionBean.class);
     }
 
-    public static class SupportsFieldConversion implements FieldConversionSupport<BeanMetadata<FieldMetadata>, FieldMetadata> {
+    public static class SupportsFieldConversion extends FieldConversionSupportBase<BeanMetadata<FieldMetadata>, FieldMetadata> implements FieldConversionSupport<BeanMetadata<FieldMetadata>, FieldMetadata> {
         private Map<Integer, Method> methodsCache = new HashMap<>();
 
         @Override

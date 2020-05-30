@@ -19,14 +19,19 @@
 package com.afrunt.beanmetadata;
 
 import com.afrunt.beanmetadata.annotation.RemoveInheritedAnnotations;
+import java8.util.Optional;
+import java8.util.function.Consumer;
+import java8.util.function.Function;
+import java8.util.function.Predicate;
+import java8.util.stream.Collectors;
+import java8.util.stream.Stream;
+import java8.util.stream.StreamSupport;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
 
 /**
  * @author Andrii Frunt
@@ -35,25 +40,62 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
 
     public M collectMetadata(Collection<Class<?>> classes) {
         M metadata = newMetadata();
+        Set<BM> beansMetadata = StreamSupport.stream(classes)
+                .filter(new Predicate<Class<?>>() {
+                    @Override
+                    public boolean test(Class<?> aClass) {
+                        return !skipClass(aClass);
+                    }
+                })
+                .map(new Function<Class<?>, BM>() {
+                    @Override
+                    public BM apply(Class<?> aClass) {
+                        return collectBeanMetadata(aClass);
+                    }
+                })
+                .filter(new Predicate<BM>() {
+                    @Override
+                    public boolean test(BM bm) {
+                        return bm != null;
+                    }
+                })
+                .filter(new Predicate<BM>() {
+                    @Override
+                    public boolean test(BM bm) {
+                        return !skipBeanMetadata(bm);
+                    }
+                }).collect(java8.util.stream.Collectors.<BM>toSet());
 
-        Set<BM> beansMetadata = classes.stream()
-                .filter(c -> !skipClass(c))
-                .map(this::collectBeanMetadata)
-                .filter(Objects::nonNull)
-                .filter(bm -> !skipBeanMetadata(bm))
-                .collect(Collectors.toSet());
+        StreamSupport.stream(beansMetadata).forEach(new Consumer<BM>() {
+            @Override
+            public void accept(BM bm) {
+                validateBeanMetadata(bm);
+            }
+        });
 
-        beansMetadata.forEach(this::validateBeanMetadata);
-
-        beansMetadata.stream()
-                .map(BeanMetadata::getFieldsMetadata)
-                .flatMap(List::stream)
-                .forEach(this::validateFieldMetadata);
+        StreamSupport.stream(beansMetadata)
+                .map(new Function<BM, List<FM>>() {
+                    @Override
+                    public List<FM> apply(BM bm) {
+                        return bm.getFieldsMetadata();
+                    }
+                })
+                .flatMap(new Function<List<FM>, Stream<FM>>() {
+                    @Override
+                    public Stream<FM> apply(List<FM> fms) {
+                        return StreamSupport.stream(fms);
+                    }
+                })
+                .forEach(new Consumer<FM>() {
+                    @Override
+                    public void accept(FM bm) {
+                        validateFieldMetadata(bm);
+                    }
+                });
 
         metadata.setBeansMetadata(
                 beansMetadata
         );
-
 
         return metadata;
     }
@@ -112,7 +154,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         fieldMetadata.setBeanClassName(cl.getName());
         Annotation[] declaredAnnotations = getter.getDeclaredAnnotations();
         fieldMetadata = handleAnnotations(fieldMetadata, declaredAnnotations);
-        fieldMetadata.setSetter(ofNullable(findSetterForGetter(cl, getter)).orElse(fieldMetadata.getSetter()));
+        fieldMetadata.setSetter(Optional.ofNullable(findSetterForGetter(cl, getter)).orElse(fieldMetadata.getSetter()));
         return fieldMetadata;
     }
 
@@ -165,29 +207,43 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<Class<? extends Annotation>> annotationsToRemove(Collection<Annotation> declaredAnnotations, Annotated annotated) {
-        RemoveInheritedAnnotations removeInherited = (RemoveInheritedAnnotations) declaredAnnotations.stream()
-                .filter(a -> a.annotationType().equals(RemoveInheritedAnnotations.class)).findFirst().orElse(null);
+    private  Collection<Class<? extends Annotation>> annotationsToRemove(Collection<? extends Annotation> declaredAnnotations, final Annotated annotated) {
+        RemoveInheritedAnnotations removeInherited =
+                (RemoveInheritedAnnotations) StreamSupport.stream(declaredAnnotations)
+                        .filter(new Predicate<Annotation>() {
+                            @Override
+                            public boolean test(Annotation annotation) {
+                                return annotation.annotationType().equals(RemoveInheritedAnnotations.class);
+                            }
+                        })
+                        .findFirst().orElse(null);
 
         if (removeInherited != null) {
-            boolean removeAllAnnotations = removeInherited.removeOnly().length == 0;
-            Collection<Class<? extends Annotation>> removeOnlyClasses = removeAllAnnotations ?
+            final boolean removeAllAnnotations = removeInherited.removeOnly().length == 0;
+            final Collection<Class<? extends Annotation>> removeOnlyClasses = removeAllAnnotations ?
                     annotated.getAnnotationTypes()
                     : Arrays.asList(removeInherited.removeOnly());
 
-            return annotated.getAnnotationTypes().stream()
-                    .filter(removeOnlyClasses::contains)
-                    .collect(Collectors.toList());
-
+            return StreamSupport.stream(annotated.getAnnotationTypes())
+                    .filter(new Predicate<Class<? extends Annotation>>() {
+                        @Override
+                        public boolean test(Class<? extends Annotation> aClass) {
+                            return removeOnlyClasses.contains(aClass);
+                        }
+                    }).collect(Collectors.<Class<? extends Annotation>>toList());
         } else {
             return Collections.emptyList();
         }
     }
 
     private Set<Method> collectFieldsGetters(Class<?> cl) {
-        return Arrays.stream(cl.getDeclaredMethods())
-                .filter(this::isValidGetter)
-                .collect(Collectors.toSet());
+        return StreamSupport.stream(Arrays.asList(cl.getDeclaredMethods()))
+                .filter(new Predicate<Method>() {
+                    @Override
+                    public boolean test(Method method) {
+                        return isValidGetter(method);
+                    }
+                }).collect(Collectors.<Method>toSet());
     }
 
     protected List<FM> collectFieldsMetadata(Class<?> cl, Set<Method> getters, BM beanMetadata) {
@@ -213,9 +269,12 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     }
 
     protected Collection<Annotation> filterSkippedAnnotations(Collection<Annotation> annotations) {
-        return annotations.stream()
-                .filter(a -> !isSkippedAnnotation(a))
-                .collect(Collectors.toList());
+        return StreamSupport.stream(annotations).filter(new Predicate<Annotation>() {
+            @Override
+            public boolean test(Annotation annotation) {
+                return !isSkippedAnnotation(annotation);
+            }
+        }).collect(Collectors.<Annotation>toList());
     }
 
     protected boolean isSkippedAnnotation(Annotation annotation) {
@@ -236,7 +295,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
         return nameIsValid
                 && isPublic(m)
                 && !returnType.equals(Void.class)
-                && m.getParameterCount() == 0;
+                && m.getParameterTypes().length == 0;
     }
 
     private boolean isBooleanReturnType(Class<?> returnType) {
@@ -257,7 +316,7 @@ public abstract class MetadataCollector<M extends Metadata<BM, FM>, BM extends B
     protected Method findSetterForGetter(Class<?> cl, Method getter) {
         try {
             Method setter = cl.getMethod(setterNameFromGetter(getter), getter.getReturnType());
-            boolean validSetter = setter != null && setter.getParameterCount() == 1 && isPublic(setter);
+            boolean validSetter = setter != null && setter.getParameterTypes().length == 1 && isPublic(setter);
             return validSetter ? setter : null;
         } catch (NoSuchMethodException e) {
             //Field without setter

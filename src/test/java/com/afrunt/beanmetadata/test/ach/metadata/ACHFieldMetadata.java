@@ -20,6 +20,7 @@ package com.afrunt.beanmetadata.test.ach.metadata;
 
 import com.afrunt.beanmetadata.FieldMetadata;
 import com.afrunt.beanmetadata.test.ach.annotation.*;
+import java8.util.function.Function;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,7 +74,12 @@ public class ACHFieldMetadata extends FieldMetadata {
 
     public String getDateFormat() {
         return getOptionalAnnotation(DateFormat.class)
-                .map(DateFormat::value)
+                .map(new Function<DateFormat, String>() {
+                    @Override
+                    public String apply(DateFormat dateFormat) {
+                        return dateFormat.value();
+                    }
+                })
                 .orElse(null);
     }
 

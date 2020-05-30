@@ -25,9 +25,7 @@ import com.afrunt.beanmetadata.Metadata;
 import com.afrunt.beanmetadata.test.basic.annotation.AnotherFieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.FieldAnnotation;
 import com.afrunt.beanmetadata.test.basic.annotation.TypeAnnotation;
-import com.afrunt.beanmetadata.test.basic.domain.Bean;
-import com.afrunt.beanmetadata.test.basic.domain.ChildBean;
-import com.afrunt.beanmetadata.test.basic.domain.SecondBean;
+import com.afrunt.beanmetadata.test.basic.domain.*;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
@@ -155,6 +153,6 @@ public class BasicMetadataCollectorTest extends BasicTest {
 
     @Override
     protected Collection<Class<?>> classes() {
-        return Arrays.asList(Bean.class, SecondBean.class);
+        return Arrays.<Class<?>>asList(Bean.class, SecondBean.class);
     }
 }

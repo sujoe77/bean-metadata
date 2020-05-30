@@ -18,9 +18,12 @@
  */
 package com.afrunt.beanmetadata;
 
+import java8.util.Optional;
+
 import java.lang.annotation.Annotation;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Andrii Frunt
@@ -30,79 +33,33 @@ public interface Annotated {
 
     Annotated setAnnotationsMap(Map<Class<? extends Annotation>, Annotation> annotationsMap);
 
-    default Set<Annotation> getAnnotations() {
-        return new HashSet<>(getAnnotationsMap().values());
-    }
+    Set<Annotation> getAnnotations();
 
-    default Annotated setAnnotations(Set<Annotation> annotations) {
-        Map<Class<? extends Annotation>, Annotation> map = new HashMap<>();
-        for (Annotation a : annotations) {
-            map.put(a.annotationType(), a);
-        }
-        setAnnotationsMap(map);
-        return this;
-    }
+    Annotated setAnnotations(Set<Annotation> annotations);
 
-    default Collection<Class<? extends Annotation>> getAnnotationTypes() {
-        return new HashSet<>(getAnnotationsMap().keySet());
-    }
+    Collection<Class<? extends Annotation>> getAnnotationTypes();
 
     @SuppressWarnings("unchecked")
-    default <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        return (T) getAnnotationsMap().get(annotationType);
-    }
+    <T extends Annotation> T getAnnotation(Class<T> annotationType);
 
-    default <T extends Annotation> Optional<T> getOptionalAnnotation(Class<T> annotationType) {
-        return Optional.ofNullable(getAnnotation(annotationType));
-    }
+    <T extends Annotation> Optional<T> getOptionalAnnotation(Class<T> annotationType);
 
-    default Annotated addAnnotation(Annotation annotation) {
-        HashMap<Class<? extends Annotation>, Annotation> map = new HashMap<>(getAnnotationsMap());
-        map.put(annotation.annotationType(), annotation);
-        setAnnotationsMap(map);
-        return this;
-    }
+    Annotated addAnnotation(Annotation annotation);
 
-    default Annotated addAnnotations(Collection<Annotation> annotations) {
-        annotations.forEach(this::addAnnotation);
-        return this;
-    }
+    Annotated addAnnotations(Collection<Annotation> annotations);
 
-    default Annotated addAnnotations(Annotation[] annotations) {
-        addAnnotations(Arrays.asList(annotations));
-        return this;
-    }
+    Annotated addAnnotations(Annotation[] annotations);
 
-    default <T extends Annotation> T removeAnnotation(Class<T> annotationType) {
-        T annotation = getAnnotation(annotationType);
-        HashMap<Class<? extends Annotation>, Annotation> map = new HashMap<>(getAnnotationsMap());
-        map.remove(annotationType);
-        setAnnotationsMap(map);
-        return annotation;
-    }
+    <T extends Annotation> T removeAnnotation(Class<T> annotationType);
 
-    default Set<? extends Annotation> removeAnnotations(Collection<Class<? extends Annotation>> annotationTypes) {
-        return annotationTypes.stream()
-                .map(a -> (Annotation) removeAnnotation(a))
-                .collect(Collectors.toSet());
-    }
+     Set<? extends Annotation> removeAnnotations(Collection<Class<? extends Annotation>> annotationTypes);
 
-    default Set<Annotation> removeAllAnnotations() {
-        Set<Annotation> annotations = getAnnotations();
-        setAnnotationsMap(new HashMap<>());
-        return annotations;
-    }
+    Set<Annotation> removeAllAnnotations();
 
-    default boolean isAnnotatedWith(Class<? extends Annotation> annotationType) {
-        return getAnnotation(annotationType) != null;
-    }
+    boolean isAnnotatedWith(Class<? extends Annotation> annotationType);
 
     @SuppressWarnings("unchecked")
-    default boolean isAnnotatedWithAll(Class<? extends Annotation>... annotations) {
-        return getAnnotationsMap().keySet().containsAll(Arrays.asList(annotations));
-    }
+    boolean isAnnotatedWithAll(Class<? extends Annotation>... annotations);
 
-    default boolean notAnnotatedWith(Class<? extends Annotation> annotation) {
-        return !isAnnotatedWith(annotation);
-    }
+    boolean notAnnotatedWith(Class<? extends Annotation> annotation);
 }

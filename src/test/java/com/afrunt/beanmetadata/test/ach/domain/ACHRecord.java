@@ -48,7 +48,9 @@ public abstract class ACHRecord {
 
     public String reserved(int length) {
         StringBuilder sb = new StringBuilder();
-        IntStream.range(0, length).forEach(i -> sb.append(" "));
+        for(int i = 0; i< length; i++){
+            sb.append(" ");
+        }
         return sb.toString();
     }
 }

@@ -18,10 +18,13 @@
  */
 package com.afrunt.beanmetadata;
 
+import java8.util.function.Predicate;
+import java8.util.stream.Collectors;
+import java8.util.stream.StreamSupport;
+
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author Andrii Frunt
@@ -38,17 +41,21 @@ public class Metadata<BM extends BeanMetadata<FM>, FM extends FieldMetadata> {
         return this;
     }
 
-    public Set<BM> getAnnotatedWith(Class<? extends Annotation> annotationType) {
-        return getBeansMetadata().stream()
-                .filter(b -> b.isAnnotatedWith(annotationType))
-                .collect(Collectors.toSet());
+    public Set<BM> getAnnotatedWith(final Class<? extends Annotation> annotationType) {
+        return StreamSupport.stream(getBeansMetadata()).filter(new Predicate<BM>() {
+            @Override
+            public boolean test(BM bm) {
+                return bm.isAnnotatedWith(annotationType);
+            }
+        }).collect(Collectors.<BM>toSet());
     }
 
-    public BM getBeanMetadata(Class<?> beanClass) {
-        return getBeansMetadata().stream()
-                .filter(bm -> bm.typeIs(beanClass))
-                .findFirst()
-                .orElse(null);
+    public BM getBeanMetadata(final Class<?> beanClass) {
+        return StreamSupport.stream(getBeansMetadata()).filter(new Predicate<BM>() {
+            @Override
+            public boolean test(BM bm) {
+                return bm.typeIs(beanClass);
+            }
+        }).findFirst().orElse(null);
     }
-
 }

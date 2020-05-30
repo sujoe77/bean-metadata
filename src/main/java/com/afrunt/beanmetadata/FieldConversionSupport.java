@@ -18,141 +18,36 @@
  */
 package com.afrunt.beanmetadata;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Andrii Frunt
  */
 public interface FieldConversionSupport<BM extends BeanMetadata<FM>, FM extends FieldMetadata> {
 
-    default Map<Integer, Method> getMethodsCache() {
-        return new HashMap<>();
-    }
+    Map<Integer, Method> getMethodsCache();
 
-    default Map<Integer, String> getMethodNamesCache() {
-        return new HashMap<>();
-    }
+    Map<Integer, String> getMethodNamesCache();
 
-    default Method getConverterMethod(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
-        int methodHashCode = getMethodHashCode(methodName, fromType, toType, otherParamTypes);
+    Method getConverterMethod(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes);
 
-        Map<Integer, Method> methodsCache = getMethodsCache();
-        Method method = methodsCache.get(methodHashCode);
+    int getMethodHashCode(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes);
 
-        if (method != null || methodsCache.containsKey(methodHashCode)) {
-            return method;
-        }
+    Object fieldToValue(Object value, Class toType, BM beanMetadata, FM fieldMetadata);
 
-        List<Class<?>> paramTypes = new ArrayList<>();
-        paramTypes.add(fromType);
-        paramTypes.addAll(otherParamTypes);
+    Object valueToField(Object value, Class<?> fromType, BM beanMetadata, FM fieldMetadata);
 
-        Method[] methods = getClass().getMethods();
+    Object convert(String what, Object value, BM beanMetadata, FM fieldMetadata, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes);
 
-        method = Arrays.stream(methods)
-                .filter(m -> m.getName().equals(methodName))
-                .filter(m -> methodParametersTypesAre(m, paramTypes))
-                .filter(m -> m.getReturnType().equals(toType))
-                .findFirst()
-                .orElse(null);
+    String getConverterMethodName(String whatToConvert, Class<?> fromType, Class<?> toType);
 
-        methodsCache.put(methodHashCode, method);
+    boolean methodParametersTypesAre(Method method, Class<?>... paramTypes);
 
-        return method;
-    }
+    boolean methodParametersTypesAre(Method method, List<Class<?>> paramTypes);
 
-    default int getMethodHashCode(String methodName, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
-        int methodHashCode = 31 * methodName.hashCode();
-        methodHashCode = methodHashCode * 31 + fromType.hashCode();
-        methodHashCode = methodHashCode * 31 + toType.hashCode();
-        return methodHashCode * 31 + otherParamTypes.hashCode();
-    }
+    Object executeConverterMethod(Method m, Object... params);
 
-    default Object fieldToValue(Object value, Class<?> toType, BM beanMetadata, FM fieldMetadata) {
-        Class<?> fromType = fieldMetadata.getType();
-        return convert("field", value, beanMetadata, fieldMetadata, fromType, toType,
-                Arrays.asList(beanMetadata.getClass(), fieldMetadata.getClass()));
-    }
-
-    default Object valueToField(Object value, Class<?> fromType, BM beanMetadata, FM fieldMetadata) {
-        Class<?> toType = fieldMetadata.getType();
-        return convert("value", value, beanMetadata, fieldMetadata, fromType, toType,
-                Arrays.asList(beanMetadata.getClass(), fieldMetadata.getClass()));
-    }
-
-    default Object convert(String what, Object value, BM beanMetadata, FM fieldMetadata, Class<?> fromType, Class<?> toType, List<Class<?>> otherParamTypes) {
-        String converterMethodName = getConverterMethodName(what, fromType, toType);
-        Method converterMethod = getConverterMethod(converterMethodName, fromType, toType, otherParamTypes);
-
-        boolean sameType = fromType.equals(toType);
-
-        if (converterMethod == null && sameType) {
-            return value;
-        }
-
-        if (converterMethod == null && value != null && toType.equals(String.class)) {
-            return String.valueOf(value);
-        }
-
-        if (converterMethod == null) {
-            String methodString = methodString(converterMethodName, fromType, toType, otherParamTypes);
-            throw new BeanMetadataException(what + " converter method not found " + methodString);
-        }
-
-        return executeConverterMethod(converterMethod, value, beanMetadata, fieldMetadata);
-    }
-
-    default String getConverterMethodName(String whatToConvert, Class<?> fromType, Class<?> toType) {
-        int methodNameHashCode = whatToConvert.hashCode() * 31;
-        methodNameHashCode = methodNameHashCode * 31 + fromType.hashCode();
-        methodNameHashCode = methodNameHashCode * 31 + toType.hashCode();
-
-        Map<Integer, String> methodNamesCache = getMethodNamesCache();
-        String methodName = methodNamesCache.get(methodNameHashCode);
-        if (methodName != null || methodNamesCache.containsKey(methodNameHashCode)) {
-            return methodName;
-        }
-
-        methodName = whatToConvert + fromType.getSimpleName() + "To" + toType.getSimpleName();
-        methodNamesCache.put(methodNameHashCode, methodName);
-        return methodName;
-    }
-
-    default boolean methodParametersTypesAre(Method method, Class<?>... paramTypes) {
-        return methodParametersTypesAre(method, Arrays.asList(paramTypes));
-    }
-
-    default boolean methodParametersTypesAre(Method method, List<Class<?>> paramTypes) {
-        return Arrays.asList(method.getParameterTypes()).equals(paramTypes);
-    }
-
-    default Object executeConverterMethod(Method m, Object... params) {
-        try {
-            return m.invoke(this, params);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new BeanMetadataException("Error during converter method invocation", e);
-        }
-    }
-
-    default String methodString(String name, Class<?> fromType, Class<?> toType, List<Class<?>> paramTypes) {
-        StringBuilder sb = new StringBuilder(toType.getSimpleName())
-                .append(" ")
-                .append(name)
-                .append("(");
-
-        sb
-                .append(fromType.getSimpleName());
-
-        for (Class<?> paramType : paramTypes) {
-
-            sb
-                    .append(", ")
-                    .append(paramType.getSimpleName());
-        }
-
-        sb.append(")");
-        return sb.toString();
-    }
+    String methodString(String name, Class<?> fromType, Class<?> toType, List<Class<?>> paramTypes);
 }
